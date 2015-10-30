@@ -50,6 +50,7 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         type_dl = ''
         if self.streamRadio.isChecked() is True:
             type_dl = 'stream'
+            print('stream mode')
         self.Tget_item = T_get_item(self.urlText.text(), self.pathText.text(), self.tokenText.text(), type_dl) #type_dl : 
         self.Tget_item.notifyProgress.connect(self.onProgress)
         self.Tget_item.start()  
@@ -177,7 +178,7 @@ class T_get_item(QThread):
         display to who the current token correspond, check if the token is valid
         """
         global client
-        client = soundcloud.Client(access_token=token, client_id=scdl_client_id)
+        client = soundcloud.Client(access_token=self.token, client_id='95a4c0ef214f2a4a0852142807b54b35')#scdl_client_id)
     
         try:
             current_user = client.get('/me')
@@ -236,19 +237,20 @@ class T_get_item(QThread):
     
     def _download_my_stream(self, user, name, download_function, token):
     
-        global offset
-        url = 'https://api.soundcloud.com/me/activities/tracks/affiliated?limit=152&oauth_token={0}'.format(token)
+        offset=0
+        print('test')
+        url = 'https://api.soundcloud.com/me/activities/tracks/affiliated?limit=152&oauth_token={0}'.format(self.token)
         response = urllib.request.urlopen(url)
         data = response.read()
         text = data.decode('utf-8')
         json_data = json.loads(text)
-        while json_data and self._offset <=150:
-            this_url = json_data['collection'][self._offset]['origin']['uri']
-            type = json_data['collection'][self._offset]['type']
+        while json_data: #and offset <=150:
+            this_url = json_data['collection'][offset]['origin']['uri'] # 0=offset
+            type = json_data['collection'][offset]['type']
             """logger.info('Type:{0}'.format(type))"""
-            date_track = json_data['collection'][self._offset]['created_at']
-            self._offset += 1
-            logger.info('Track n°{0}'.format(self._offset))
+            date_track = json_data['collection'][offset]['created_at']
+            offset += 1
+            logger.info('Track n°{0}'.format(offset))
             format_src = "%Y/%m/%d %H:%M:%S"
             format_dest = "%y%m%d %H%M%S - "
             date_track  = time.strftime(format_dest, time.strptime(date_track[:-6],format_src))
@@ -298,36 +300,7 @@ class T_get_item(QThread):
             self._download_track(mp3_url, '0', playlist.title)
     
         os.chdir('..')
-    
-    
-    '''def download_all(tracks):
-        """
-        Download all song of a page
-        Not recommended
-        """
-        logger.error('NOTE: This will only download the songs of the page.(49 max)')
-        logger.error('I recommend you to provide an user link and a download type.')
-        for counter, track in enumerate(tracks, 1):
-            logger.newline()
-            logger.info('Track n°{0}'.format(counter))
-            download_track(track, '0')
-    
-        
-    
-    def alternative_download(track):
-        logger.debug('alternative_download used')
-        url = 'http://api.soundcloud.com/i1/tracks/{0.id}/streams?client_id=a3e059563d7fd3372b49b37f00a00bcf'.format(track)
-        res = urllib.request.urlopen(url)
-        data = res.read().decode('utf-8')
-        json_data = json.loads(data)
-        try:
-            mp3_url = json_data['http_mp3_128_url']
-        except KeyError:
-            logger.error('http_mp3_128_url not found in json response, report to developer.')
-            mp3_url = None
-        return mp3_url
-    '''
-    
+
     def _download_track(self, track, date_t, playlist_name=None):
         """
         Downloads a track
@@ -443,8 +416,9 @@ class T_get_item(QThread):
         logger.info('Good bye!')
         
     def run(self):
-        if type is 'stream':
-            self._download_my_stream(self._who_am_i(), 'track', self._download_track())
+        if self.type is 'stream':
+            print(self.token)
+            self._download_my_stream(self._who_am_i(), 'track', 'download_track', self.token)
         self._parse_url(self.urlin, 0)
         self.finished.emit()
         self.sleep(2)
