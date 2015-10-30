@@ -56,8 +56,7 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
     def onProgress(self, i):
         self.progressBar.setValue(self.progressBar.value()+1)
     def onURLChange(self):
-        ww=self.urlText.text()
-        self.Tget_item.start()      
+        self.Tget_item.start(self.urlText.text())      
        
 class T1(QThread):
     notifyProgress = QtCore.pyqtSignal(int)
@@ -75,10 +74,8 @@ class T1(QThread):
         
 class T_get_item(QThread): 
     notifyProgress = QtCore.pyqtSignal(str)
-    
-    def __init__(self, parent=None):
-        super(T_get_item, self).__init__(parent)
-        #QThread.__init__(self)
+    def __init__(self,  url):
+        QThread.__init__(self)
 
     def __del__(self):
         self.wait()
@@ -87,7 +84,7 @@ class T_get_item(QThread):
         """
         Fetches metadata for an track or playlist
         """
-        
+
         try:
             item = client.get('/resolve', url=track_url)
         except Exception:
@@ -100,10 +97,9 @@ class T_get_item(QThread):
                 logger.exception(e)
                 sys.exit(0)
         return item
-    def run(self):
+    def run(self,  url):
         #global url
-        self.finished.emit( SIGNAL( "echoText(PyQt_PyObject)" ), "Emit: starting work" )
-        self._get_item()
+        self._get_item(url)
         for i in range(10):
             self.notifyProgress.emit(1,  'test') #1progress bar +1
             time.sleep(0.1)
