@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QThread
+from PyQt5.QtCore import QThread, pyqtSignal
 import design
 import sys
 import os
@@ -41,7 +41,7 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.myThread = T1()
         self.myThread.notifyProgress.connect(self.onProgress)
         self.myThread.start() 
-        self.Tget_item = T_get_item()
+        self.Tget_item = T_get_item(self.urlText.text())
         self.Tget_item.notifyProgress.connect(self.onProgress)
         self.urlText.returnPressed.connect(self.onURLChange)
         
@@ -76,20 +76,21 @@ class T1(QThread):
 class T_get_item(QThread): 
     notifyProgress = QtCore.pyqtSignal(str)
     
-    def __init__(self, parent=None):
-        super(T_get_item, self).__init__(parent)
-        #QThread.__init__(self)
+    def __init__(self, urlin):
+        QThread.__init__(self)
+        self.urlin = urlin
 
     def __del__(self):
         self.wait()
         
-    def _get_item(track_url):
+    def _get_item(self, urlin):
         """
         Fetches metadata for an track or playlist
         """
-        
+        track_url=urlin
         try:
             item = client.get('/resolve', url=track_url)
+            logger.error('url {0}'.format(track_url))
         except Exception:
             logger.error('Error resolving url {0}, retrying...'.format(track_url))
             time.sleep(5)
@@ -98,16 +99,14 @@ class T_get_item(QThread):
             except Exception as e:
                 logger.error('Could not resolve url {0}'.format(track_url))
                 logger.exception(e)
-                sys.exit(0)
+                #sys.exit(0)
         return item
     def run(self):
-        #global url
-        self.finished.emit( SIGNAL( "echoText(PyQt_PyObject)" ), "Emit: starting work" )
-        self._get_item()
-        for i in range(10):
-            self.notifyProgress.emit(1,  'test') #1progress bar +1
-            time.sleep(0.1)
-        self.finished.emit()
+        self._get_item(self.urlin)
+        self.started.emit()
+        self.sleep(2)
+        
+       
         
 def main():
         app = QtWidgets.QApplication(sys.argv)
