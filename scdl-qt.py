@@ -15,11 +15,19 @@ import configparser
 import mutagen
 import wget
 import urllib
+import re
 from docopt import docopt
 from requests.exceptions import HTTPError
 
 from scdl import __version__
 from scdl import soundcloud, utils
+from urllib.request import urlopen
+
+
+scdl_client_id = '95a4c0ef214f2a4a0852142807b54b35'
+client = soundcloud.Client(client_id=scdl_client_id)
+token = ''
+
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logging.getLogger('urllib3.connectionpool').setLevel(logging.ERROR)
@@ -27,12 +35,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addFilter(utils.ColorizeFilter())
 logger.newline = print
-scdl_client_id = '95a4c0ef214f2a4a0852142807b54b35'
-client = soundcloud.Client(client_id=scdl_client_id)
-token = ''
-
-
-        
+      
 class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
     def __init__(self, parent=None):
         super(ExampleApp, self).__init__(parent)
@@ -41,19 +44,60 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.pathText.setText(os.environ['UserProfile']+'\Desktop\scdl')
         self.go.clicked.connect(self.handleButton)
         
+    
+    
+    def download(self):
+        '''pbar = self.progressBar
+        print('oh yeah')
+        #file = urlopen('https://download.microsoft.com/download/d/3/0/d30e32d8-418a-469d-b600-f32ce3edf42d/WindowsXP-KB936929-SP3-x86-ENU.exe')
+        url='https://download.microsoft.com/download/d/3/0/d30e32d8-418a-469d-b600-f32ce3edf42d/WindowsXP-KB936929-SP3-x86-ENU.exe'
+        file_name = url.split('/')[-1]
+        u = urlopen(url)
+        f = open(file_name, 'wb')
+        file_size=int(u.getheader('Content-Length'))
+        print("Downloading: {0} Bytes: {1}".format(url, file_size))
 
+        file_size_dl = 0
+        block_sz = 8192
+        while True:
+            buffer = u.read(block_sz)
+            if not buffer:
+                break
+
+            file_size_dl += len(buffer)
+            f.write(buffer)
+            p = float(file_size_dl) / file_size
+            pbar.setValue(p)
+            #status = r"{0}  [{1:.2%}]".format(file_size_dl, p)
+            
+            #status = status + chr(8)*(len(status)+1)
+            #sys.stdout.write(status)
+
+        f.close()'''
+    
+    
         
+       
     def handleButton(self):
-        self.myThread = T1()
-        self.myThread.notifyProgress.connect(self.onProgress)
-        self.myThread.start()
+        self.download()
         type_dl = ''
         if self.streamRadio.isChecked() is True:
             type_dl = 'stream'
             print('stream mode')
-        self.Tget_item = T_get_item(self.urlText.text(), self.pathText.text(), self.tokenText.text(), type_dl) #type_dl : 
-        self.Tget_item.notifyProgress.connect(self.onProgress)
-        self.Tget_item.start()  
+            pattern = re.compile("^\w-\w\w\w\w\w\w-\w\w\w\w\w\w-\w\w\w\w\w\w\w\w\w\w\w\w\w\w\w\w")
+            if pattern.match(self.tokenText.text()):
+                print('token matches RegEx')
+                self.Tget_item = T_get_item(self.urlText.text(), self.pathText.text(), self.tokenText.text(), type_dl, self.progressBar) #type_dl : 
+                self.Tget_item.notifyProgress2.connect(self.onProgress)
+                self.Tget_item.start() 
+            else:
+                self.logTextEdit.appendPlainText('Token inputed doesnt look valid.... Valid token is like : 1-126000-000707-50006e52ef30d000')
+        elif self.urlRadio.isChecked() is True:
+            self.Tget_item = T_get_item(self.urlText.text(), self.pathText.text(), self.tokenText.text(), type_dl, self.progressBar) #type_dl : 
+            self.Tget_item.notifyProgress2.connect(self.onProgress)
+            self.Tget_item.start() 
+ 
+        
         
     def browse_folder(self):
         directory = QtWidgets.QFileDialog.getExistingDirectory(self,
@@ -61,34 +105,24 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         # execute getExistingDirectory dialog and set the directory variable 
         self.pathText.setText(directory)
         
-    def onProgress(self, i):
-        self.progressBar.setValue(self.progressBar.value()+1)
-    #def onURLChange(self):
-     #   self.Tget_item.start()      
-       
-class T1(QThread):
-    notifyProgress = QtCore.pyqtSignal(int)
-    def __init__(self):
-        QThread.__init__(self)
-
-    def __del__(self):
-        self.wait()
-
-    def run(self):
-        for i in range(10):
-            self.notifyProgress.emit(i) #progress bar +1
-            time.sleep(0.1)
-        self.finished.emit()
-        
-class T_get_item(QThread): 
-    notifyProgress = QtCore.pyqtSignal(str)
+    def onProgress(self, message, p):
+        if 'fuck' not in message:
+            self.logTextEdit.appendPlainText(message)
+        if p is not 999:
+            self.progressBar.setValue(p)
     
-    def __init__(self, urlin, pathin, token, type):
+       
+      
+class T_get_item(QThread): 
+    notifyProgress2 = QtCore.pyqtSignal(str, int)
+    
+    def __init__(self, urlin, pathin, token, type, progress):
         QThread.__init__(self)
         self.urlin = urlin
         self.pathin = pathin
         self.token = token
         self.type = type
+        self.progressBar = progress
 
     def __del__(self):
         self.wait()
@@ -148,8 +182,9 @@ class T_get_item(QThread):
             #logger.info('Found a playlist')
             #download_playlist(item)
         elif item.kind == 'playlist':
-            logger.info('Found a playlist, but i am setup to skip it :)')
-            """download_playlist(item)"""
+            logger.info('Found a playlist')
+            self.notifyProgress2.emit('Found a playlist... starting loop to dl it', 999)
+            self._download_playlist(item)
         elif item.kind == 'user':
             logger.info('Found an user profile')
         if type is 'f':
@@ -185,7 +220,9 @@ class T_get_item(QThread):
         except:
             logger.error('Invalid token...')
             sys.exit(0)
+
         logger.info('Hello {0.username}!'.format(current_user))
+        self.notifyProgress2.emit('Hello {0.username}!'.format(current_user).encode('ascii', errors='ignore').decode('ascii', errors='replace'), 999)
         logger.newline()
         return current_user
     
@@ -244,13 +281,14 @@ class T_get_item(QThread):
         data = response.read()
         text = data.decode('utf-8')
         json_data = json.loads(text)
-        while json_data: #and offset <=150:
+        while json_data and offset <=150:
             this_url = json_data['collection'][offset]['origin']['uri'] # 0=offset
             type = json_data['collection'][offset]['type']
             """logger.info('Type:{0}'.format(type))"""
             date_track = json_data['collection'][offset]['created_at']
             offset += 1
             logger.info('Track n°{0}'.format(offset))
+            self.notifyProgress2.emit('Track n°{0}'.format(offset), 999)
             format_src = "%Y/%m/%d %H:%M:%S"
             format_dest = "%y%m%d %H%M%S - "
             date_track  = time.strftime(format_dest, time.strptime(date_track[:-6],format_src))
@@ -262,7 +300,7 @@ class T_get_item(QThread):
         while 1:
             url = json_data['next_href']
             offset=0
-            url = url + '&limit=150&oauth_token={0}'.format(token)
+            url = url + '&limit=150&oauth_token={0}'.format(self.token)
             logger.info(url)
             response = urllib.request.urlopen(url)
             data = response.read()
@@ -320,8 +358,8 @@ class T_get_item(QThread):
         title = track.title
         logger.info('date {0}'.format(date_t))
         title = title.encode('utf-8', 'ignore').decode(sys.stdout.encoding)
-        logger.info('Downloading {0}'.format(title))
-    
+        logger.info('Downloading  {0}'.format(title))
+        self.notifyProgress2.emit('Downloading {0}'.format(title), 999)
         #filename
         if track.downloadable :
             logger.info('Downloading the orginal file.')
@@ -348,7 +386,36 @@ class T_get_item(QThread):
         filename.translate(':"\/*?|<>')
         filename=''.join(i for i in filename if i not in invalid_chars)
         if not os.path.isfile(filename):
-            wget.download(url, filename)
+            #wget.download(url, filename)#, bar=self.progressBar1)
+            #pbar = self.progress
+            print('oh yeah')
+            #file = urlopen('https://download.microsoft.com/download/d/3/0/d30e32d8-418a-469d-b600-f32ce3edf42d/WindowsXP-KB936929-SP3-x86-ENU.exe')
+            #url='https://download.microsoft.com/download/d/3/0/d30e32d8-418a-469d-b600-f32ce3edf42d/WindowsXP-KB936929-SP3-x86-ENU.exe'
+            #file_name = url.split('/')[-1]
+            u = urlopen(url)
+            f = open(filename, 'wb')
+            file_size=int(u.getheader('Content-Length'))
+            print("Downloading: {0} Bytes: {1}".format(url, file_size))
+
+            file_size_dl = 0
+            block_sz = 8192
+            while True:
+                buffer = u.read(block_sz)
+                if not buffer:
+                    break
+
+                file_size_dl += len(buffer)
+                f.write(buffer)
+                p = float(file_size_dl) / file_size
+                #pbar.setValue(p)
+                #print(p)
+                p = int(p*100)
+                self.notifyProgress2.emit('fuck', p)
+                #status = r"{0}  [{1:.2%}]".format(file_size_dl, p)
+                #status = status + chr(8)*(len(status)+1)
+                #sys.stdout.write(status)
+
+            f.close()
             logger.newline()
             if '.mp3' in filename:
                 try:
@@ -430,6 +497,7 @@ def main():
         form = ExampleApp()
         form.show()
         app.exec_()
+        
         
 
 

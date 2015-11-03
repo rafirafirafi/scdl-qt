@@ -6,15 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>706</width>
+    <width>705</width>
     <height>374</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>scdl-qt :)</string>
-  </property>
-  <property name="statusTip">
-   <string/>
   </property>
   <property name="autoFillBackground">
    <bool>false</bool>
@@ -49,17 +46,17 @@
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QRadioButton" name="radioButton_2">
+   <widget class="QRadioButton" name="urlRadio">
     <property name="geometry">
      <rect>
       <x>110</x>
       <y>10</y>
-      <width>121</width>
+      <width>461</width>
       <height>17</height>
      </rect>
     </property>
     <property name="text">
-     <string>Favs of an user</string>
+     <string>URL (user url if dl all tracks, track url for 1 track, fav url for all favs, playlist url, etc...)</string>
     </property>
    </widget>
    <widget class="QLabel" name="label">
@@ -84,8 +81,11 @@
       <height>23</height>
      </rect>
     </property>
+    <property name="maximum">
+     <number>100</number>
+    </property>
     <property name="value">
-     <number>0</number>
+     <number>20</number>
     </property>
     <property name="textVisible">
      <bool>false</bool>
@@ -291,12 +291,15 @@
     </property>
    </widget>
    <widget class="QCheckBox" name="checkBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>521</x>
-      <y>111</y>
-      <width>165</width>
-      <height>16</height>
+      <y>112</y>
+      <width>162</width>
+      <height>17</height>
      </rect>
     </property>
     <property name="text">
@@ -307,12 +310,15 @@
     </property>
    </widget>
    <widget class="QCheckBox" name="checkBox_2">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>521</x>
-      <y>129</y>
-      <width>165</width>
-      <height>16</height>
+      <y>135</y>
+      <width>129</width>
+      <height>17</height>
      </rect>
     </property>
     <property name="text">
@@ -320,29 +326,25 @@
     </property>
    </widget>
    <widget class="QCheckBox" name="checkBox_3">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>521</x>
-      <y>147</y>
-      <width>165</width>
-      <height>16</height>
+      <y>158</y>
+      <width>167</width>
+      <height>17</height>
      </rect>
     </property>
     <property name="text">
      <string>Download mp3 only (128kbits)</string>
     </property>
    </widget>
-   <widget class="QListWidget" name="output">
-    <property name="geometry">
-     <rect>
-      <x>130</x>
-      <y>110</y>
-      <width>256</width>
-      <height>192</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QRadioButton" name="radioButton_3">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>110</x>
@@ -356,6 +358,9 @@
     </property>
    </widget>
    <widget class="QRadioButton" name="radioButton_4">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>110</x>
@@ -366,6 +371,35 @@
     </property>
     <property name="text">
      <string>Playlist</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_4">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>521</x>
+      <y>181</y>
+      <width>94</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Ignore reposts</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="gettokenButton">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>50</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>get sc token</string>
     </property>
    </widget>
   </widget>
