@@ -8,19 +8,18 @@ import os
 import time
 import json
 import logging
-import signal
+import webbrowser
 import urllib.request
-import warnings
-import configparser
+#import warnings
+#import configparser
 import mutagen
-import wget
 import urllib
 import re
-from docopt import docopt
-from requests.exceptions import HTTPError
+#from docopt import docopt
+#from requests.exceptions import HTTPError
 
-from scdl import __version__
-from scdl import soundcloud, utils
+#from scdl import __version__
+from scdl import soundcloud#, utils
 from urllib.request import urlopen
 
 
@@ -33,7 +32,7 @@ logging.basicConfig(level=logging.INFO, format='%(message)s')
 logging.getLogger('urllib3.connectionpool').setLevel(logging.ERROR)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-logger.addFilter(utils.ColorizeFilter())
+#logger.addFilter(utils.ColorizeFilter())
 logger.newline = print
       
 class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
@@ -41,48 +40,14 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         super(ExampleApp, self).__init__(parent)
         self.setupUi(self)
         self.btnBrowse.clicked.connect(self.browse_folder)
+        self.gettokenButton.clicked.connect(self.gettoken)
         self.pathText.setText(os.environ['UserProfile']+'\Desktop\scdl')
         self.go.clicked.connect(self.handleButton)
-        
-    
-    
-    def download(self):
-        '''pbar = self.progressBar
-        print('oh yeah')
-        #file = urlopen('https://download.microsoft.com/download/d/3/0/d30e32d8-418a-469d-b600-f32ce3edf42d/WindowsXP-KB936929-SP3-x86-ENU.exe')
-        url='https://download.microsoft.com/download/d/3/0/d30e32d8-418a-469d-b600-f32ce3edf42d/WindowsXP-KB936929-SP3-x86-ENU.exe'
-        file_name = url.split('/')[-1]
-        u = urlopen(url)
-        f = open(file_name, 'wb')
-        file_size=int(u.getheader('Content-Length'))
-        print("Downloading: {0} Bytes: {1}".format(url, file_size))
 
-        file_size_dl = 0
-        block_sz = 8192
-        while True:
-            buffer = u.read(block_sz)
-            if not buffer:
-                break
-
-            file_size_dl += len(buffer)
-            f.write(buffer)
-            p = float(file_size_dl) / file_size
-            pbar.setValue(p)
-            #status = r"{0}  [{1:.2%}]".format(file_size_dl, p)
-            
-            #status = status + chr(8)*(len(status)+1)
-            #sys.stdout.write(status)
-
-        f.close()'''
-    
-    
-        
-       
     def handleButton(self):
-        self.download()
         type_dl = ''
         if self.streamRadio.isChecked() is True:
-            type_dl = 'stream'
+            type_dl='stream'
             print('stream mode')
             pattern = re.compile("^\w-\w\w\w\w\w\w-\w\w\w\w\w\w-\w\w\w\w\w\w\w\w\w\w\w\w\w\w\w\w")
             if pattern.match(self.tokenText.text()):
@@ -92,12 +57,22 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
                 self.Tget_item.start() 
             else:
                 self.logTextEdit.appendPlainText('Token inputed doesnt look valid.... Valid token is like : 1-126000-000707-50006e52ef30d000')
-        elif self.urlRadio.isChecked() is True:
+        elif self.allfavsRadio.isChecked() is True:
+            type_dl='f'
+        elif self.alltracksRadio.isChecked() is True:
+            type_dl='a'
+        elif self.trackRadio.isChecked() is True:
+            type_dl='t'
+        elif self.playlistRadio.isChecked() is True:
+            type_dl='p'
+        if type_dl != 'stream':
             self.Tget_item = T_get_item(self.urlText.text(), self.pathText.text(), self.tokenText.text(), type_dl, self.progressBar) #type_dl : 
             self.Tget_item.notifyProgress2.connect(self.onProgress)
-            self.Tget_item.start() 
- 
-        
+            self.Tget_item.start()
+            
+    def gettoken(self):
+        print('uck offf')
+        webbrowser.open_new('http://flyingrub.tk/soundcloud/')
         
     def browse_folder(self):
         directory = QtWidgets.QFileDialog.getExistingDirectory(self,
@@ -110,9 +85,7 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
             self.logTextEdit.appendPlainText(message)
         if p is not 999:
             self.progressBar.setValue(p)
-    
-       
-      
+
 class T_get_item(QThread): 
     notifyProgress2 = QtCore.pyqtSignal(str, int)
     
@@ -164,46 +137,36 @@ class T_get_item(QThread):
                 #sys.exit(0)
         return item
             
-    def _parse_url(self, track_url, date_t):
+    def _parse_url(self, track_url, date_t,  type):
         """
         Detects if the URL is a track or playlists, and parses the track(s) to the track downloader
         """
         global arguments
+        print('DFDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD')
         item = self._get_item(track_url)
-    
-        if not item:
-            return
-        #elif isinstance(item, soundcloud.resource.ResourceList):
-            #download_all(item)
-        elif item.kind == 'track':
+        print('url being read is {0}'.format(track_url))
+        if item.kind == 'track' and type is 't':
             logger.info('Found a track')
             self._download_track(item, date_t)
-        #elif item.kind == 'playlist' and arguments['-l']:
-            #logger.info('Found a playlist')
-            #download_playlist(item)
-        elif item.kind == 'playlist':
+        elif item.kind == 'playlist' and type is 'p':
             logger.info('Found a playlist')
             self.notifyProgress2.emit('Found a playlist... starting loop to dl it', 999)
             self._download_playlist(item)
-        elif item.kind == 'user':
+        elif item.kind == 'user' and type =='a':
             logger.info('Found an user profile')
+            self._download_all_of_user(self.urlin, 'track', self._download_track)
+            print(type)
         if type is 'f':
             self._download_all_of_user(self.urlin, 'favorite', self._download_track)
+            print(type)
         elif type is 't':
-            self._download_all_of_user(self.urlin, 'track', self._download_track)
+            #self._download_all_of_user(self.urlin, 'track', self._download_track)
+            print(type)
         elif type is 'a':
-            self._download_all_user_tracks(self.urlin)
-        #elif type is 'p':
-            '''if arguments['-f']:
-                download_all_of_user(item, 'favorite', download_track)
-            elif arguments['-t']:
-                download_all_of_user(item, 'track', download_track)
-            elif arguments['-a']:
-                download_all_user_tracks(item)
-            elif arguments['-p']:
-                download_all_of_user(item, 'playlist', download_playlist)
-            else:
-                logger.error('Please provide a download type...')'''
+            #self._download_all_user_tracks(self.urlin)
+            print(type)
+        elif type is 'p':
+            self._download_all_of_user(item, 'playlist', self._download_playlist)
         else:
             logger.error('Unknown item type')
     
@@ -232,9 +195,12 @@ class T_get_item(QThread):
         Find track & repost of the user
         """
         #global offset
-        logger.info('Hello ID {0.id}!'.format(user))
-        url = 'https://api.sndcdn.com/e1/users/{0.id}/sounds.json?limit=1&offset={1}&client_id={2}'.format(user, 0, scdl_client_id)
+        item = self._get_item(user)
+        logger.info('Hello ID {0.id}!'.format(item))
+        url = 'https://api.sndcdn.com/e1/users/{0.id}/sounds.json?limit=1&offset={1}&client_id={2}'.format(item, 0, scdl_client_id)
+        print(url)
         response = urllib.request.urlopen(url)
+        
         data = response.read()
         text = data.decode('utf-8')
         json_data = json.loads(text)
@@ -245,9 +211,9 @@ class T_get_item(QThread):
             except:
                 this_url = json_data[0]['playlist']['uri']
             logger.info('Track n°{0}'.format(self._offset))
-            self._parse_url(this_url, '0')
-    
-            url = 'https://api.sndcdn.com/e1/users/{0.id}/sounds.json?limit=1&offset={1}&client_id={2}'.format(user, self._offset, scdl_client_id)
+            self._parse_url(this_url, '0', 't')
+            print('parsed')
+            url = 'https://api.sndcdn.com/e1/users/{0.id}/sounds.json?limit=1&offset={1}&client_id={2}'.format(item, self._offset, scdl_client_id)
             response = urllib.request.urlopen(url)
             data = response.read()
             text = data.decode('utf-8')
@@ -258,6 +224,7 @@ class T_get_item(QThread):
         """
         Download all items of an user. Can be playlist or track, or whatever handled by the download function.
         """
+        user = self._get_item(user)
         logger.info('Retrieving the {1}s of user {0.username}...'.format(user, name))
         items = client.get_all('/users/{0.id}/{1}s'.format(user, name))
         total = len(items)
@@ -266,7 +233,7 @@ class T_get_item(QThread):
         for counter, item in enumerate(items, 1):
             try:
                 logger.info('{0} n°{1} of {2}'.format(name.capitalize(), counter, total))
-                download_function(item)
+                download_function(item, 0)
             except Exception as e:
                 logger.exception(e)
         logger.info('Downloaded all {2} {0}{1} of user {3.username}!'.format(name, s, total, user))
@@ -275,7 +242,6 @@ class T_get_item(QThread):
     def _download_my_stream(self, user, name, download_function, token):
     
         offset=0
-        print('test')
         url = 'https://api.soundcloud.com/me/activities/tracks/affiliated?limit=152&oauth_token={0}'.format(self.token)
         response = urllib.request.urlopen(url)
         data = response.read()
@@ -324,6 +290,9 @@ class T_get_item(QThread):
         """
         Download a playlist
         """
+        print(playlist.tracks)
+        print(enumerate(playlist.tracks, 1))
+        
         invalid_chars = '\/:*?|<>"'
         playlist_name = playlist.title.encode('utf-8', 'ignore').decode('utf-8')
         playlist_name = ''.join(c for c in playlist_name if c not in invalid_chars)
@@ -334,9 +303,9 @@ class T_get_item(QThread):
     
         for counter, track_raw in enumerate(playlist.tracks, 1):
             mp3_url = self._get_item(track_raw['permalink_url'])
-            logger.info('Track n°{0}'.format(counter))
+            logger.info('Track n°{0} / {1}'.format(counter, track_raw in enumerate(playlist.tracks, 1)))
             self._download_track(mp3_url, '0', playlist.title)
-    
+    #TODO : problem with lenght of playlist. it will download even if no more tracks
         os.chdir('..')
 
     def _download_track(self, track, date_t, playlist_name=None):
@@ -386,19 +355,18 @@ class T_get_item(QThread):
         filename.translate(':"\/*?|<>')
         filename=''.join(i for i in filename if i not in invalid_chars)
         if not os.path.isfile(filename):
-            #wget.download(url, filename)#, bar=self.progressBar1)
-            #pbar = self.progress
             print('oh yeah')
-            #file = urlopen('https://download.microsoft.com/download/d/3/0/d30e32d8-418a-469d-b600-f32ce3edf42d/WindowsXP-KB936929-SP3-x86-ENU.exe')
-            #url='https://download.microsoft.com/download/d/3/0/d30e32d8-418a-469d-b600-f32ce3edf42d/WindowsXP-KB936929-SP3-x86-ENU.exe'
-            #file_name = url.split('/')[-1]
             u = urlopen(url)
-            f = open(filename, 'wb')
+            full_filename= self.pathin + '\\' + filename
+            if not os.path.isdir(self.pathin):
+                os.mkdir(self.pathin)
+            f = open(full_filename, 'wb')
             file_size=int(u.getheader('Content-Length'))
             print("Downloading: {0} Bytes: {1}".format(url, file_size))
+            self.notifyProgress2.emit('size: {0} Mb'.format(file_size/1000000), 999)
 
             file_size_dl = 0
-            block_sz = 8192
+            block_sz = 8196
             while True:
                 buffer = u.read(block_sz)
                 if not buffer:
@@ -407,13 +375,7 @@ class T_get_item(QThread):
                 file_size_dl += len(buffer)
                 f.write(buffer)
                 p = float(file_size_dl) / file_size
-                #pbar.setValue(p)
-                #print(p)
-                p = int(p*100)
-                self.notifyProgress2.emit('fuck', p)
-                #status = r"{0}  [{1:.2%}]".format(file_size_dl, p)
-                #status = status + chr(8)*(len(status)+1)
-                #sys.stdout.write(status)
+                self.notifyProgress2.emit('fuck', int(p*100))
 
             f.close()
             logger.newline()
@@ -486,7 +448,7 @@ class T_get_item(QThread):
         if self.type is 'stream':
             print(self.token)
             self._download_my_stream(self._who_am_i(), 'track', 'download_track', self.token)
-        self._parse_url(self.urlin, 0)
+        self._parse_url(self.urlin, 0, self.type)
         self.finished.emit()
         self.sleep(2)
         
