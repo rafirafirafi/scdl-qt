@@ -2,39 +2,149 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>705</width>
-    <height>374</height>
+    <width>704</width>
+    <height>373</height>
    </rect>
+  </property>
+  <property name="palette">
+   <palette>
+    <active>
+     <colorrole role="Button">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>128</red>
+        <green>128</green>
+        <blue>128</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Base">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>128</red>
+        <green>128</green>
+        <blue>128</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Window">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>128</red>
+        <green>128</green>
+        <blue>128</blue>
+       </color>
+      </brush>
+     </colorrole>
+    </active>
+    <inactive>
+     <colorrole role="Button">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>128</red>
+        <green>128</green>
+        <blue>128</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Base">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>128</red>
+        <green>128</green>
+        <blue>128</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Window">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>128</red>
+        <green>128</green>
+        <blue>128</blue>
+       </color>
+      </brush>
+     </colorrole>
+    </inactive>
+    <disabled>
+     <colorrole role="Button">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>128</red>
+        <green>128</green>
+        <blue>128</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Base">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>128</red>
+        <green>128</green>
+        <blue>128</blue>
+       </color>
+      </brush>
+     </colorrole>
+     <colorrole role="Window">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
+        <red>128</red>
+        <green>128</green>
+        <blue>128</blue>
+       </color>
+      </brush>
+     </colorrole>
+    </disabled>
+   </palette>
   </property>
   <property name="windowTitle">
    <string>scdl-qt :)</string>
   </property>
+  <property name="statusTip">
+   <string/>
+  </property>
   <property name="autoFillBackground">
    <bool>false</bool>
   </property>
+  <property name="styleSheet">
+   <string notr="true">#MainWindow {
+background: gray;
+}
+QLineEdit {
+padding: 0.5px;
+border-style: solid;
+
+
+background: lightgray;
+}
+
+
+QProgressBar {
+
+
+
+background: gray;
+border-size=0px;
+
+}
+
+QProgressBar::chunk {
+background: black;
+}</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLineEdit" name="tokenText">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>330</y>
-      <width>201</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
    <widget class="QRadioButton" name="streamRadio">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>30</y>
+      <y>20</y>
       <width>82</width>
       <height>17</height>
      </rect>
@@ -49,8 +159,8 @@
    <widget class="QRadioButton" name="alltracksRadio">
     <property name="geometry">
      <rect>
-      <x>111</x>
-      <y>11</y>
+      <x>91</x>
+      <y>21</y>
       <width>115</width>
       <height>16</height>
      </rect>
@@ -75,9 +185,9 @@
    <widget class="QProgressBar" name="progressBar">
     <property name="geometry">
      <rect>
-      <x>220</x>
+      <x>320</x>
       <y>330</y>
-      <width>471</width>
+      <width>371</width>
       <height>23</height>
      </rect>
     </property>
@@ -191,6 +301,12 @@
       </disabled>
      </palette>
     </property>
+    <property name="font">
+     <font>
+      <family>Calibri</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
     <property name="frameShape">
      <enum>QFrame::NoFrame</enum>
     </property>
@@ -205,27 +321,14 @@
    <widget class="QLineEdit" name="urlText">
     <property name="geometry">
      <rect>
-      <x>221</x>
-      <y>27</y>
-      <width>391</width>
+      <x>90</x>
+      <y>40</y>
+      <width>431</width>
       <height>20</height>
      </rect>
     </property>
     <property name="text">
      <string>https://soundcloud.com/iamdjday/four-hills</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton">
-    <property name="geometry">
-     <rect>
-      <x>615</x>
-      <y>26</y>
-      <width>75</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Paste</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_2">
@@ -242,13 +345,23 @@
     </property>
    </widget>
    <widget class="QCommandLinkButton" name="go">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>580</x>
-      <y>280</y>
-      <width>111</width>
+      <x>550</x>
+      <y>260</y>
+      <width>101</width>
       <height>41</height>
      </rect>
+    </property>
+    <property name="palette">
+     <palette>
+      <active/>
+      <inactive/>
+      <disabled/>
+     </palette>
     </property>
     <property name="text">
      <string>Download</string>
@@ -257,22 +370,25 @@
    <widget class="QPushButton" name="btnBrowse">
     <property name="geometry">
      <rect>
-      <x>610</x>
+      <x>450</x>
       <y>90</y>
-      <width>75</width>
-      <height>23</height>
+      <width>62</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
      <string>Browse</string>
     </property>
+    <property name="flat">
+     <bool>false</bool>
+    </property>
    </widget>
    <widget class="QLineEdit" name="pathText">
     <property name="geometry">
      <rect>
-      <x>171</x>
-      <y>91</y>
-      <width>441</width>
+      <x>90</x>
+      <y>90</y>
+      <width>351</width>
       <height>20</height>
      </rect>
     </property>
@@ -281,7 +397,7 @@
     <property name="geometry">
      <rect>
       <x>90</x>
-      <y>90</y>
+      <y>70</y>
       <width>81</width>
       <height>16</height>
      </rect>
@@ -290,9 +406,9 @@
      <string>download folder</string>
     </property>
    </widget>
-   <widget class="QCheckBox" name="checkBox">
+   <widget class="QCheckBox" name="cBox">
     <property name="enabled">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="geometry">
      <rect>
@@ -303,36 +419,20 @@
      </rect>
     </property>
     <property name="text">
-     <string>Continue if file already exists</string>
+     <string>Overwrite files</string>
     </property>
     <property name="checked">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="mp3Box">
+    <property name="enabled">
      <bool>true</bool>
     </property>
-   </widget>
-   <widget class="QCheckBox" name="checkBox_2">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
     <property name="geometry">
      <rect>
-      <x>521</x>
-      <y>184</y>
-      <width>129</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Add artist to file name</string>
-    </property>
-   </widget>
-   <widget class="QCheckBox" name="checkBox_3">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>521</x>
-      <y>207</y>
+      <x>520</x>
+      <y>190</y>
       <width>167</width>
       <height>17</height>
      </rect>
@@ -347,9 +447,9 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>111</x>
-      <y>30</y>
-      <width>115</width>
+      <x>210</x>
+      <y>20</y>
+      <width>101</width>
       <height>16</height>
      </rect>
     </property>
@@ -363,8 +463,8 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>111</x>
-      <y>68</y>
+      <x>370</x>
+      <y>20</y>
       <width>115</width>
       <height>16</height>
      </rect>
@@ -373,14 +473,14 @@
      <string>Playlist</string>
     </property>
    </widget>
-   <widget class="QCheckBox" name="checkBox_4">
+   <widget class="QCheckBox" name="rBox">
     <property name="enabled">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="geometry">
      <rect>
       <x>521</x>
-      <y>230</y>
+      <y>220</y>
       <width>94</width>
       <height>17</height>
      </rect>
@@ -393,9 +493,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>60</y>
-      <width>75</width>
-      <height>23</height>
+      <y>40</y>
+      <width>71</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
@@ -408,9 +508,9 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>111</x>
-      <y>49</y>
-      <width>115</width>
+      <x>320</x>
+      <y>20</y>
+      <width>51</width>
       <height>16</height>
      </rect>
     </property>
@@ -429,6 +529,32 @@
     </property>
     <property name="text">
      <string>options not implemented yet</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="saveButton">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>330</y>
+      <width>81</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>save to config</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="tokenText">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>330</y>
+      <width>201</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
     </property>
    </widget>
   </widget>
