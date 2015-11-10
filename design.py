@@ -12,7 +12,9 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setEnabled(True)
-        MainWindow.resize(704, 373)
+        MainWindow.resize(704, 350)
+        MainWindow.setMinimumSize(QtCore.QSize(704, 350))
+        MainWindow.setMaximumSize(QtCore.QSize(704, 350))
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(128, 128, 128))
         brush.setStyle(QtCore.Qt.SolidPattern)
@@ -66,7 +68,45 @@ class Ui_MainWindow(object):
 "}\n"
 "\n"
 "QProgressBar::chunk {\n"
-"background: black;\n"
+"    background-color: black;\n"
+"}\n"
+"\n"
+"QRadioButton::indicator:checked, QRadioButton::indicator:unchecked{\n"
+"    color: #b1b1b1;\n"
+"    background-color: #323232;\n"
+"    border: 1px solid #303232;\n"
+"    border-radius: 6px;\n"
+"}\n"
+"\n"
+"QRadioButton::indicator:checked\n"
+"{\n"
+"    background-color: qradialgradient(\n"
+"        cx: 0.5, cy: 0.5,\n"
+"        fx: 0.5, fy: 0.5,\n"
+"        radius: 1.0,\n"
+"        stop: 0.25 #ff69b4,\n"
+"        stop: 0.3 #323232\n"
+"    );\n"
+"}\n"
+"\n"
+"QLineEdit\n"
+"{\n"
+"    background-color: lightgray;\n"
+"    padding: 1px;\n"
+"    border-style: solid;\n"
+"    border: 1px solid #1e1e1e;\n"
+"    border-radius: 5;\n"
+"}\n"
+"\n"
+"\n"
+"QRadioButton::indicator\n"
+"{\n"
+"    border-radius: 6px;\n"
+"}\n"
+"\n"
+"QRadioButton::indicator:hover\n"
+"{\n"
+"    border: 1px solid #303232;\n"
 "}")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -78,16 +118,16 @@ class Ui_MainWindow(object):
         self.alltracksRadio.setGeometry(QtCore.QRect(91, 21, 115, 16))
         self.alltracksRadio.setObjectName("alltracksRadio")
         self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(10, 310, 111, 16))
+        self.label.setGeometry(QtCore.QRect(450, 200, 111, 16))
         self.label.setObjectName("label")
         self.progressBar = QtWidgets.QProgressBar(self.centralwidget)
-        self.progressBar.setGeometry(QtCore.QRect(320, 330, 371, 23))
+        self.progressBar.setGeometry(QtCore.QRect(10, 320, 681, 23))
         self.progressBar.setMaximum(100)
         self.progressBar.setProperty("value", 0)
         self.progressBar.setTextVisible(False)
         self.progressBar.setObjectName("progressBar")
         self.logTextEdit = QtWidgets.QPlainTextEdit(self.centralwidget)
-        self.logTextEdit.setGeometry(QtCore.QRect(10, 120, 501, 191))
+        self.logTextEdit.setGeometry(QtCore.QRect(10, 120, 421, 191))
         palette = QtGui.QPalette()
         brush = QtGui.QBrush(QtGui.QColor(255, 0, 127))
         brush.setStyle(QtCore.Qt.SolidPattern)
@@ -122,19 +162,26 @@ class Ui_MainWindow(object):
         font.setPointSize(9)
         self.logTextEdit.setFont(font)
         self.logTextEdit.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.logTextEdit.setReadOnly(False)
+        self.logTextEdit.setReadOnly(True)
+        self.logTextEdit.setPlainText("")
         self.logTextEdit.setObjectName("logTextEdit")
         self.urlText = QtWidgets.QLineEdit(self.centralwidget)
-        self.urlText.setGeometry(QtCore.QRect(90, 40, 431, 20))
+        self.urlText.setGeometry(QtCore.QRect(90, 40, 421, 20))
         self.urlText.setObjectName("urlText")
-        self.label_2 = QtWidgets.QLabel(self.centralwidget)
-        self.label_2.setGeometry(QtCore.QRect(10, 100, 111, 16))
-        self.label_2.setObjectName("label_2")
         self.go = QtWidgets.QCommandLinkButton(self.centralwidget)
         self.go.setEnabled(True)
-        self.go.setGeometry(QtCore.QRect(550, 260, 101, 41))
+        self.go.setGeometry(QtCore.QRect(550, 40, 101, 41))
         palette = QtGui.QPalette()
         self.go.setPalette(palette)
+        font = QtGui.QFont()
+        font.setFamily("Segoe UI")
+        font.setBold(True)
+        font.setItalic(False)
+        font.setWeight(75)
+        self.go.setFont(font)
+        self.go.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.go.setAutoFillBackground(True)
+        self.go.setIconSize(QtCore.QSize(40, 40))
         self.go.setObjectName("go")
         self.btnBrowse = QtWidgets.QPushButton(self.centralwidget)
         self.btnBrowse.setGeometry(QtCore.QRect(450, 90, 62, 21))
@@ -148,12 +195,12 @@ class Ui_MainWindow(object):
         self.label_3.setObjectName("label_3")
         self.cBox = QtWidgets.QCheckBox(self.centralwidget)
         self.cBox.setEnabled(True)
-        self.cBox.setGeometry(QtCore.QRect(521, 161, 162, 17))
-        self.cBox.setChecked(False)
+        self.cBox.setGeometry(QtCore.QRect(450, 120, 162, 17))
+        self.cBox.setChecked(True)
         self.cBox.setObjectName("cBox")
         self.mp3Box = QtWidgets.QCheckBox(self.centralwidget)
         self.mp3Box.setEnabled(True)
-        self.mp3Box.setGeometry(QtCore.QRect(520, 190, 167, 17))
+        self.mp3Box.setGeometry(QtCore.QRect(450, 140, 167, 17))
         self.mp3Box.setObjectName("mp3Box")
         self.allfavsRadio = QtWidgets.QRadioButton(self.centralwidget)
         self.allfavsRadio.setEnabled(True)
@@ -165,7 +212,7 @@ class Ui_MainWindow(object):
         self.playlistRadio.setObjectName("playlistRadio")
         self.rBox = QtWidgets.QCheckBox(self.centralwidget)
         self.rBox.setEnabled(True)
-        self.rBox.setGeometry(QtCore.QRect(521, 220, 94, 17))
+        self.rBox.setGeometry(QtCore.QRect(450, 160, 94, 17))
         self.rBox.setObjectName("rBox")
         self.gettokenButton = QtWidgets.QPushButton(self.centralwidget)
         self.gettokenButton.setGeometry(QtCore.QRect(10, 40, 71, 21))
@@ -174,20 +221,14 @@ class Ui_MainWindow(object):
         self.trackRadio.setEnabled(True)
         self.trackRadio.setGeometry(QtCore.QRect(320, 20, 51, 16))
         self.trackRadio.setObjectName("trackRadio")
-        self.label_4 = QtWidgets.QLabel(self.centralwidget)
-        self.label_4.setGeometry(QtCore.QRect(530, 140, 151, 16))
-        self.label_4.setObjectName("label_4")
         self.saveButton = QtWidgets.QPushButton(self.centralwidget)
-        self.saveButton.setGeometry(QtCore.QRect(220, 330, 81, 21))
+        self.saveButton.setGeometry(QtCore.QRect(450, 250, 81, 21))
         self.saveButton.setObjectName("saveButton")
         self.tokenText = QtWidgets.QLineEdit(self.centralwidget)
-        self.tokenText.setGeometry(QtCore.QRect(10, 330, 201, 20))
+        self.tokenText.setGeometry(QtCore.QRect(450, 220, 241, 20))
         self.tokenText.setText("")
         self.tokenText.setObjectName("tokenText")
         MainWindow.setCentralWidget(self.centralwidget)
-        self.statusBar = QtWidgets.QStatusBar(MainWindow)
-        self.statusBar.setObjectName("statusBar")
-        MainWindow.setStatusBar(self.statusBar)
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -198,20 +239,16 @@ class Ui_MainWindow(object):
         self.streamRadio.setText(_translate("MainWindow", "My Stream"))
         self.alltracksRadio.setText(_translate("MainWindow", "All Tracks from URL"))
         self.label.setText(_translate("MainWindow", "sc token for stream dl"))
-        self.logTextEdit.setPlainText(_translate("MainWindow", "coucou\n"
-""))
-        self.urlText.setText(_translate("MainWindow", "https://soundcloud.com/iamdjday/four-hills"))
-        self.label_2.setText(_translate("MainWindow", "debug"))
+        self.urlText.setText(_translate("MainWindow", "https://soundcloud.com/"))
         self.go.setText(_translate("MainWindow", "Download"))
         self.btnBrowse.setText(_translate("MainWindow", "Browse"))
         self.label_3.setText(_translate("MainWindow", "download folder"))
-        self.cBox.setText(_translate("MainWindow", "Overwrite files"))
+        self.cBox.setText(_translate("MainWindow", "Skip download if file exists"))
         self.mp3Box.setText(_translate("MainWindow", "Download mp3 only (128kbits)"))
         self.allfavsRadio.setText(_translate("MainWindow", "All Favs from URL"))
         self.playlistRadio.setText(_translate("MainWindow", "Playlist"))
         self.rBox.setText(_translate("MainWindow", "Ignore reposts"))
         self.gettokenButton.setText(_translate("MainWindow", "get sc token"))
         self.trackRadio.setText(_translate("MainWindow", "Track"))
-        self.label_4.setText(_translate("MainWindow", "options not implemented yet"))
         self.saveButton.setText(_translate("MainWindow", "save to config"))
 

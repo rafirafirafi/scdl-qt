@@ -10,8 +10,20 @@
     <x>0</x>
     <y>0</y>
     <width>704</width>
-    <height>373</height>
+    <height>350</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>704</width>
+    <height>350</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>704</width>
+    <height>350</height>
+   </size>
   </property>
   <property name="palette">
    <palette>
@@ -136,7 +148,45 @@ border-size=0px;
 }
 
 QProgressBar::chunk {
-background: black;
+    background-color: black;
+}
+
+QRadioButton::indicator:checked, QRadioButton::indicator:unchecked{
+    color: #b1b1b1;
+    background-color: #323232;
+    border: 1px solid #303232;
+    border-radius: 6px;
+}
+
+QRadioButton::indicator:checked
+{
+    background-color: qradialgradient(
+        cx: 0.5, cy: 0.5,
+        fx: 0.5, fy: 0.5,
+        radius: 1.0,
+        stop: 0.25 #ff69b4,
+        stop: 0.3 #323232
+    );
+}
+
+QLineEdit
+{
+    background-color: lightgray;
+    padding: 1px;
+    border-style: solid;
+    border: 1px solid #1e1e1e;
+    border-radius: 5;
+}
+
+
+QRadioButton::indicator
+{
+    border-radius: 6px;
+}
+
+QRadioButton::indicator:hover
+{
+    border: 1px solid #303232;
 }</string>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -172,8 +222,8 @@ background: black;
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>310</y>
+      <x>450</x>
+      <y>200</y>
       <width>111</width>
       <height>16</height>
      </rect>
@@ -185,9 +235,9 @@ background: black;
    <widget class="QProgressBar" name="progressBar">
     <property name="geometry">
      <rect>
-      <x>320</x>
-      <y>330</y>
-      <width>371</width>
+      <x>10</x>
+      <y>320</y>
+      <width>681</width>
       <height>23</height>
      </rect>
     </property>
@@ -206,7 +256,7 @@ background: black;
      <rect>
       <x>10</x>
       <y>120</y>
-      <width>501</width>
+      <width>421</width>
       <height>191</height>
      </rect>
     </property>
@@ -311,11 +361,10 @@ background: black;
      <enum>QFrame::NoFrame</enum>
     </property>
     <property name="readOnly">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="plainText">
-     <string>coucou
-</string>
+     <string/>
     </property>
    </widget>
    <widget class="QLineEdit" name="urlText">
@@ -323,25 +372,12 @@ background: black;
      <rect>
       <x>90</x>
       <y>40</y>
-      <width>431</width>
+      <width>421</width>
       <height>20</height>
      </rect>
     </property>
     <property name="text">
-     <string>https://soundcloud.com/iamdjday/four-hills</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_2">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>100</y>
-      <width>111</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>debug</string>
+     <string>https://soundcloud.com/</string>
     </property>
    </widget>
    <widget class="QCommandLinkButton" name="go">
@@ -351,7 +387,7 @@ background: black;
     <property name="geometry">
      <rect>
       <x>550</x>
-      <y>260</y>
+      <y>40</y>
       <width>101</width>
       <height>41</height>
      </rect>
@@ -363,8 +399,28 @@ background: black;
       <disabled/>
      </palette>
     </property>
+    <property name="font">
+     <font>
+      <family>Segoe UI</family>
+      <weight>75</weight>
+      <italic>false</italic>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
+    </property>
+    <property name="autoFillBackground">
+     <bool>true</bool>
+    </property>
     <property name="text">
      <string>Download</string>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>40</width>
+      <height>40</height>
+     </size>
     </property>
    </widget>
    <widget class="QPushButton" name="btnBrowse">
@@ -412,17 +468,17 @@ background: black;
     </property>
     <property name="geometry">
      <rect>
-      <x>521</x>
-      <y>161</y>
+      <x>450</x>
+      <y>120</y>
       <width>162</width>
       <height>17</height>
      </rect>
     </property>
     <property name="text">
-     <string>Overwrite files</string>
+     <string>Skip download if file exists</string>
     </property>
     <property name="checked">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QCheckBox" name="mp3Box">
@@ -431,8 +487,8 @@ background: black;
     </property>
     <property name="geometry">
      <rect>
-      <x>520</x>
-      <y>190</y>
+      <x>450</x>
+      <y>140</y>
       <width>167</width>
       <height>17</height>
      </rect>
@@ -479,8 +535,8 @@ background: black;
     </property>
     <property name="geometry">
      <rect>
-      <x>521</x>
-      <y>220</y>
+      <x>450</x>
+      <y>160</y>
       <width>94</width>
       <height>17</height>
      </rect>
@@ -518,24 +574,11 @@ background: black;
      <string>Track</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_4">
-    <property name="geometry">
-     <rect>
-      <x>530</x>
-      <y>140</y>
-      <width>151</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>options not implemented yet</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="saveButton">
     <property name="geometry">
      <rect>
-      <x>220</x>
-      <y>330</y>
+      <x>450</x>
+      <y>250</y>
       <width>81</width>
       <height>21</height>
      </rect>
@@ -547,9 +590,9 @@ background: black;
    <widget class="QLineEdit" name="tokenText">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>330</y>
-      <width>201</width>
+      <x>450</x>
+      <y>220</y>
+      <width>241</width>
       <height>20</height>
      </rect>
     </property>
@@ -558,7 +601,6 @@ background: black;
     </property>
    </widget>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <resources/>
  <connections/>

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import QThread, pyqtSignal, QCoreApplication
 import design
 import sys
 import os
@@ -19,6 +19,9 @@ import re
 from requests.exceptions import HTTPError
 import requests
 requests.packages.urllib3.disable_warnings()
+#import tempfile
+#sys.stdout = tempfile.TemporaryFile()
+#sys.stderr = tempfile.TemporaryFile()
 
 #from scdl import __version__
 from scdl import soundcloud, utils
@@ -61,7 +64,7 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         config = configparser.ConfigParser()
         config.read(os.path.join(os.path.expanduser('~'), '.config/scdl/scdl-qt.cfg'))
         if not os.path.isfile(os.path.join(os.path.expanduser('~'), '.config/scdl/scdl-qt.cfg')):
-            print('config file doesnt exists.... creating a blank one in userprofile/.config/scdl')
+            #print('config file doesnt exists.... creating a blank one in userprofile/.config/scdl')
             with open(os.path.join(os.path.expanduser('~'), '.config/scdl/scdl-qt.cfg'),'w+') as f:
                 f.write('[scdl]\nauth_token = \npath = {0}'.format(os.environ['UserProfile']+'\Desktop\scdl'))
                 self.pathText.setText(os.environ['UserProfile']+'\Desktop\scdl')
@@ -72,7 +75,7 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
             self.tokenText.setText(token)
             self.pathText.setText(path)
         except:
-            logger.error('bug reading config (should not happen... maybe folder rights issue')
+            self.logTextEdit.appendPlainText('bug reading config (should not happen... maybe folder rights issue')
             #sys.exit()
         #if os.path.exists(config['scdl']['path']):
         #    ExampleApp.pathText.setValue(config['scdl']['path'])
@@ -94,15 +97,19 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
             options=options+'r'
         if self.mp3Box.isChecked():
             options=options+'m'
-        
         self.go.setEnabled(False)
         type_dl = ''
+        if self.streamRadio.isChecked() is False:
+            if not re.match('(?:https?:\/\/)?(?:www\.?)?soundcloud\.com((?=([^a-z 0-9]))([^\s])*|)',self.urlText.text()):
+                self.logTextEdit.appendPlainText('not soundcloud URL')
+                self.go.setEnabled(True)
+                return
         if self.streamRadio.isChecked() is True:
             type_dl='stream'
-            print('stream mode')
+            #print('stream mode')
             pattern = re.compile("^\w-\w\w\w\w\w\w-*")
             if pattern.match(self.tokenText.text()):
-                print('token matches RegEx')
+                #print('token matches RegEx')
                 self.Tget_item = T_get_item(self.urlText.text(), self.pathText.text(), self.tokenText.text(), type_dl, self.progressBar, options) #type_dl : 
                 self.Tget_item.console.connect(self.onProgress)
                 self.Tget_item.start() 
@@ -111,12 +118,29 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
                 self.go.setEnabled(True)
         elif self.allfavsRadio.isChecked() is True:
             type_dl='f'
+            if not re.match('http.?://(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,300})?/likes',self.urlText.text()):
+                self.logTextEdit.appendPlainText('if you want to dl favs, url needs to end with /likes or /likes/')
+                self.go.setEnabled(True)
+                return
+
         elif self.alltracksRadio.isChecked() is True:
             type_dl='a'
+            if not re.match('https?://(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,300})?',self.urlText.text()):
+                self.logTextEdit.appendPlainText('URL doesnt seems to be valid')
+                self.go.setEnabled(True)
+                return
         elif self.trackRadio.isChecked() is True:
             type_dl='t'
+            if not re.match('https?://(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,300})?',self.urlText.text()):
+                self.logTextEdit.appendPlainText('URL doesnt seems to be valid')
+                self.go.setEnabled(True)
+                return
         elif self.playlistRadio.isChecked() is True:
             type_dl='p'
+            if not re.match('https?://(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,300})?',self.urlText.text()):
+                self.logTextEdit.appendPlainText('URL doesnt seems to be valid')
+                self.go.setEnabled(True)
+                return
         if type_dl != 'stream':
             self.Tget_item = T_get_item(self.urlText.text(), self.pathText.text(), self.tokenText.text(), type_dl, self.progressBar, options) #type_dl : 
             self.Tget_item.mysignal.connect(lambda: self.go.setEnabled(True), QtCore.Qt.QueuedConnection)
@@ -126,7 +150,7 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         
     
     def gettoken(self):
-        print('uck offf')
+        #print('uck offf')
         webbrowser.open_new('http://flyingrub.tk/soundcloud/')
         
     def browse_folder(self):
@@ -169,48 +193,48 @@ class T_get_item(QThread):
         track_url=urlin
         try:
             item = client.get('/resolve', url=track_url)
-            logger.error('url {0}'.format(track_url))
+            #logger.error('url {0}'.format(track_url))
+            return item
         except Exception:
-            logger.error('Error resolving url {0}, retrying...'.format(track_url))
-            time.sleep(5)
-            try:
-                item = client.get('/resolve', url=track_url)
-            except Exception as e:
-                logger.error('Could not resolve url {0}'.format(track_url))
-                logger.exception(e)
-                #sys.exit(0)
-        return item
+            self._parse_url('','','','',True)
+        return 
             
-    def _parse_url(self, track_url, date_t,  type,  options):
+    def _parse_url(self, track_url, date_t,  type,  options, abort=False):
         """
         Detects if the URL is a track or playlists, and parses the track(s) to the track downloader
         """
+        if abort is True:
+            return
         item = self._get_item(track_url)
-        print('url being read is {0}'.format(track_url))
+        #print('url being read is {0}'.format(track_url))
         if item.kind == 'track' and type is 't':
-            logger.info('Found a track')
+            #logger.info('Found a track')
             self._download_track(item, date_t, options)
         elif item.kind == 'playlist' and type is 'p':
-            logger.info('Found a playlist')
+            #logger.info('Found a playlist')
+            #logger.info(len(item.tracks))
+            #logger.info(enumerate(item.tracks, 1))
             self.console.emit('Found a playlist... starting loop to dl it', 999)
-            self._download_playlist(item, options)
+            self._download_playlist(item, options, len(item.tracks))
+            #print('AQUI')
+            #print(enumerate(item.tracks, 1))
         elif item.kind == 'user' and type =='a':
-            logger.info('Found an user profile')
+            #logger.info('Found an user profile')
             self._download_all_of_user(self.urlin, 'track', self._download_track, options)
-            print(type)
+            #print(type)
         if type is 'f':
             self._download_all_of_user(self.urlin, 'favorite', self._download_track, options)
-            print(type)
-        elif type is 't':
+            #print(type)
+        #elif type is 't':
             #self._download_all_of_user(self.urlin, 'track', self._download_track)
-            print(type)
-        elif type is 'a':
+            #print(type)
+        #elif type is 'a':
             #self._download_all_user_tracks(self.urlin)
-            print(type)
-        elif type is 'p':
-            self._download_all_of_user(item, 'playlist', self._download_playlist, options)
-        else:
-            logger.error('Unknown item type')
+            #print(type)
+        #elif type is 'p':
+        #    self._download_all_of_user(item, 'playlist', self._download_playlist, options)
+        #else:
+            #logger.error('Unknown item type')
     
     
     def _who_am_i(self):
@@ -223,12 +247,13 @@ class T_get_item(QThread):
         try:
             current_user = client.get('/me')
         except:
-            logger.error('Invalid token...')
-            sys.exit(0)
+            #logger.error('Invalid token...')
+            self.console.emit('token problem',999)
+            return
 
-        logger.info('Hello {0.username}!'.format(current_user))
+        #logger.info('Hello {0.username}!'.format(current_user))
         self.console.emit('Hello {0.username}!'.format(current_user).encode('ascii', errors='ignore').decode('ascii', errors='replace'), 999)
-        logger.newline()
+        #logger.newline()
         return current_user
     
     
@@ -238,9 +263,9 @@ class T_get_item(QThread):
         """
         #global offset
         item = self._get_item(user)
-        logger.info('Hello ID {0.id}!'.format(item))
+        #logger.info('Hello ID {0.id}!'.format(item))
         url = 'https://api.sndcdn.com/e1/users/{0.id}/sounds.json?limit=1&offset={1}&client_id={2}'.format(item, 0, scdl_client_id)
-        print(url)
+        #print(url)
         response = urllib.request.urlopen(url)
         
         data = response.read()
@@ -252,9 +277,9 @@ class T_get_item(QThread):
                 this_url = json_data[0]['track']['uri']
             except:
                 this_url = json_data[0]['playlist']['uri']
-            logger.info('Track n°{0}'.format(self._offset))
+            #logger.info('Track n°{0}'.format(self._offset))
             self._parse_url(this_url, '0', 't', options)
-            print('parsed')
+            #print('parsed')
             url = 'https://api.sndcdn.com/e1/users/{0.id}/sounds.json?limit=1&offset={1}&client_id={2}'.format(item, self._offset, scdl_client_id)
             response = urllib.request.urlopen(url)
             data = response.read()
@@ -262,27 +287,30 @@ class T_get_item(QThread):
             json_data = json.loads(text)
     
     
-    def _download_all_of_user(self, user, name, download_function, options):
+    def _download_all_of_user(self, user, name, download_function, options, abort=False):
         """
         Download all items of an user. Can be playlist or track, or whatever handled by the download function.
         """
+        if abort is True:
+            return
+        
         user = self._get_item(user)
-        logger.info('Retrieving the {1}s of user {0.username}...'.format(user, name))
+        #logger.info('Retrieving the {1}s of user {0.username}...'.format(user, name))
         self.console.emit('Retrieving the {1}s of user {0.username}...'.format(user, name), 999)
         items = client.get_all('/users/{0.id}/{1}s'.format(user, name))
         total = len(items)
         s = '' if total == 1 else 's'
-        logger.info('Retrieved {2} {0}{1}'.format(name, s, total))
+        #logger.info('Retrieved {2} {0}{1}'.format(name, s, total))
         self.console.emit('Retrieved {2} {0}{1}'.format(name, s, total), 999)
         for counter, item in enumerate(items, 1):
             try:
-                logger.info('{0} n°{1} of {2}'.format(name.capitalize(), counter, total))
+                #logger.info('{0} n°{1} of {2}'.format(name.capitalize(), counter, total))
                 self.console.emit('{0} n°{1} of {2}'.format(name.capitalize(), counter, total), 999)
                 download_function(item, 0, options)
             except Exception as e:
-                logger.exception(e)
+                #logger.exception(e)
                 self.console.emit('ERROR:'+str(e), 999)
-        logger.info('Downloaded all {2} {0}{1} of user {3.username}!'.format(name, s, total, user))
+        #logger.info('Downloaded all {2} {0}{1} of user {3.username}!'.format(name, s, total, user))
         self.console.emit('Downloaded all {2} {0}{1} of user {3.username}!'.format(name, s, total, user), 999)
     
     
@@ -300,21 +328,21 @@ class T_get_item(QThread):
             """logger.info('Type:{0}'.format(type))"""
             date_track = json_data['collection'][offset]['created_at']
             offset += 1
-            logger.info('Track n°{0}'.format(offset))
+            #logger.info('Track n°{0}'.format(offset))
             self.console.emit('Track n°{0}'.format(offset), 999)
             format_src = "%Y/%m/%d %H:%M:%S"
             format_dest = "%y%m%d %H%M%S - "
             date_track  = time.strftime(format_dest, time.strptime(date_track[:-6],format_src))
             if (type == 'track-repost') and 'r' in options:
                 self.console.emit('Repost skipped...', 999)
-                print('fuck reposts')
+                #print('fuck reposts')
             else:
                 self._parse_url(this_url, date_track, 't', options)
         while 1:
             url = json_data['next_href']
             offset=0
             url = url + '&limit=150&oauth_token={0}'.format(self.token)
-            logger.info(url)
+            #logger.info(url)
             response = urllib.request.urlopen(url)
             data = response.read()
             text = data.decode('utf-8')
@@ -324,22 +352,23 @@ class T_get_item(QThread):
                 type = json_data['collection'][offset]['type']
                 date_track = json_data['collection'][offset]['created_at']
                 offset += 1
-                logger.info('Track n°{0}'.format(offset))
+                #logger.info('Track n°{0}'.format(offset))
                 format_src = "%Y/%m/%d %H:%M:%S"
                 format_dest = "%y%m%d %H%M%S - "
                 date_track  = time.strftime(format_dest, time.strptime(date_track[:-6],format_src))
             if (type == 'track-repost') and 'r' in options:
                 self.console.emit('Repost skipped...', 999)
-                print('fuck reposts')
+                #print('fuck reposts')
             elif (type != 'track-repost'):
                 self._parse_url(this_url, date_track, 't', options)
                 
-    def _download_playlist(self, playlist, options):
+    def _download_playlist(self, playlist, options, number):
         """
         Download a playlist
         """
-        print(playlist.tracks)
-        print(enumerate(playlist.tracks, 1))
+        #print(playlist.tracks)
+        #print('HERE')
+        #print(len(playlist.tracks).encode('utf-8', 'ignore').decode('utf-8'))
         
         invalid_chars = '\/:*?|<>"'
         playlist_name = playlist.title.encode('utf-8', 'ignore').decode('utf-8')
@@ -351,7 +380,8 @@ class T_get_item(QThread):
     
         for counter, track_raw in enumerate(playlist.tracks, 1):
             mp3_url = self._get_item(track_raw['permalink_url'])
-            logger.info('Track n°{0} / {1}'.format(counter, track_raw in enumerate(playlist.tracks, 1)))
+            #logger.info('Track n°{0} / {1}'.format(counter, track_raw in len(playlist.tracks)))
+            self.console.emit('Track n°{0} / {1}'.format(counter, number),999)
             self._download_track(mp3_url, '0', options, playlist.title)
     #TODO : problem with lenght of playlist. it will download even if no more tracks
         os.chdir('..')
@@ -366,10 +396,12 @@ class T_get_item(QThread):
                 stream_url = client.get(track.stream_url, allow_redirects=False)
                 url = stream_url.location
             except HTTPError:
-                url = self._alternative_download(track)
+                self.console.emit('internet error. please restart the app or check your internet connection',999)
+                return
+                
         else:
-            logger.error('{0.title} is not streamable...'.format(track))
-            logger.newline()
+            #logger.error('{0.title} is not streamable...'.format(track))
+            self.console.emit('Problem downloading this track, soundcloud api didnt give proper url', 999)
             return
         title = track.title
         #logger.info('date {0}'.format(date_t))
@@ -378,7 +410,7 @@ class T_get_item(QThread):
         self.console.emit('Downloading {0}'.format(title), 999)
         #filename
         if track.downloadable and 'm' not in options:
-            logger.info('Downloading the orginal file.')
+            #logger.info('Downloading the orginal file.')
             url = '{0.download_url}?client_id={1}'.format(track, scdl_client_id)
     
             filename = urllib.request.urlopen(url).info()['Content-Disposition'].split('filename=')[1]
@@ -394,6 +426,7 @@ class T_get_item(QThread):
             title=''.join(i for i in title if i not in invalid_chars)
             #logger.info('.........{0} title after filters'.format(title))
             filename = title + '.mp3'
+            
             #filename = date_t + filename # REMOVED date-t for debug
             filename = filename
     
@@ -401,18 +434,23 @@ class T_get_item(QThread):
         invalid_chars = ':"\/*?|<>'
         filename.translate(':"\/*?|<>')
         filename=''.join(i for i in filename if i not in invalid_chars)
-        print(options)
-        if (os.path.isfile(self.pathin + '\\' + filename) and 'c' in options) or (not os.path.isfile(self.pathin + '\\' + filename)): 
+        #print(options)
+        if (os.path.isfile(self.pathin + '\\' + filename) and 'c' in options):
+            #TODO: stop thread
+            return
+            
+        if (os.path.isfile(self.pathin + '\\' + filename) and 'c' not in options) or (not os.path.isfile(self.pathin + '\\' + filename)): 
         #if not os.path.isfile(filename+):
-            print('oh yeah c is in options')
+            #print('oh yeah c is in options')
             u = urlopen(url)
             full_filename= self.pathin + '\\' + filename
             if not os.path.isdir(self.pathin):
                 os.mkdir(self.pathin)
             f = open(full_filename, 'wb')
             file_size=int(u.getheader('Content-Length'))
-            print("Downloading: {0} Bytes: {1}".format(url, file_size))
-            self.console.emit('size: {0} Mb'.format(file_size/1000000), 999)
+            #print("Downloading: {0} Bytes: {1}".format(url, file_size))
+            size=round(file_size/1000000, 1)
+            self.console.emit('size: {0} Mb'.format(size), 999)
 
             file_size_dl = 0
             block_sz = 8196
@@ -438,7 +476,7 @@ class T_get_item(QThread):
             else:
                 logger.error("This type of audio doesn't support tagging...")'''
         else:
-            print(options)
+            #print(options)
             if 'c' not in options:  
                 self.console.emit('Already exists, skipping...', 999)
     
@@ -471,8 +509,8 @@ class T_get_item(QThread):
             if not os.path.isdir(f) and '.tmp' in f:
                 os.remove(f)
     
-        logger.newline()
-        logger.info('Good bye!')
+        #logger.newline()
+        #logger.info('Good bye!')
         
     def run(self):
         if self.type is 'stream':
