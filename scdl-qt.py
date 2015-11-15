@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QThread, pyqtSignal, QCoreApplication
+from PyQt5.QtCore import QThread, pyqtSignal, QCoreApplication, QByteArray, QPropertyAnimation
 import design
 import sys
 import os
@@ -27,14 +27,14 @@ from urllib.request import urlopen
 scdl_client_id = '95a4c0ef214f2a4a0852142807b54b35'
 client = soundcloud.Client(client_id=scdl_client_id)
 
-
+'''
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logging.getLogger('urllib3.connectionpool').setLevel(logging.ERROR)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addFilter(utils.ColorizeFilter())
 logger.newline = print
-
+'''
 
 
 class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
@@ -46,11 +46,29 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.saveButton.clicked.connect(self.saveconfig)
         self.stopButton.clicked.connect(self.stop)
         self.go.setEnabled(True)
-        self.saveButton.setEnabled(False)
+        self.stopButton.setEnabled(False)
         self.go.clicked.connect(self.handleButton)
+
+
         self._get_config()
+
+        #self.alltracksRadio.clicked.connect(self.alltracksclicked)
+        #self.allfavsRadio.clicked.connect(self.allfavsclicked)
+
         
-    def stop(self):
+
+   # def alltracksclicked(self):
+        #if (self.urlText.text() == 'https://www.soundcloud.com/rafi-ki') or (self.urlText.text() == 'https://www.soundcloud.com/rafi-ki/likes') or (self.urlText.text() == 'https://soundcloud.com/rafi-ki/rafiki-mixtape-015-instrumental-hiphop-triphop') or (self.urlText.text() == 'https://soundcloud.com/marco-roeth/sets/trip-hop'):
+       #self.urlText.setText('https://www.soundcloud.com/rafi-ki')
+        ## def allfavsclicked(self):
+     #   if (self.urlText.text() == 'https://www.soundcloud.com/rafi-ki') or (self.urlText.text() == 'https://www.soundcloud.com/rafi-ki/likes') or (self.urlText.text() == 'https://soundcloud.com/rafi-ki/rafiki-mixtape-015-instrumental-hiphop-triphop') or (self.urlText.text() == 'https://soundcloud.com/marco-roeth/sets/trip-hop'):
+      #      self.urlText.setText('https://www.soundcloud.com/rafi-ki/likes')
+   # def alltracksclicked(self):
+      #  if (self.urlText.text() == 'https://www.soundcloud.com/rafi-ki') or (self.urlText.text() == 'https://www.soundcloud.com/rafi-ki/likes') or (self.urlText.text() == 'https://soundcloud.com/rafi-ki/rafiki-mixtape-015-instrumental-hiphop-triphop') or (self.urlText.text() == 'https://soundcloud.com/marco-roeth/sets/trip-hop'):
+       #     self.urlText.setText('https://www.soundcloud.com/rafi-ki')
+
+        
+    def stop(self): #Dirty way to kill thread. A restart of the app should be done to avoid memory leaks... fine for now.
         if (self.Tget_item.isRunning):
             self.Tget_item.terminate()
             self.go.setEnabled(True)
@@ -65,7 +83,7 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         if not os.path.isfile(os.path.join(os.path.expanduser('~'), '.config/scdl/scdl-qt.cfg')):
             #print('config file doesnt exists.... creating a blank one in userprofile/.config/scdl')
             with open(os.path.join(os.path.expanduser('~'), '.config/scdl/scdl-qt.cfg'),'w+') as f:
-                f.write('[scdl]\nauth_token = \npath = {0}'.format(os.environ['UserProfile']+'\Desktop\scdl'))
+                f.write('[scdl]\nauth_token = \npath = {0}'.format(os.environ['UserProfile']+'\Desktop\scdl')) # create config file with blank token and %userprofile%\desktop\scdl folder
                 self.pathText.setText(os.environ['UserProfile']+'\Desktop\scdl')
                 f.close()
         try:
@@ -73,8 +91,9 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
             path = config['scdl']['path']
             self.tokenText.setText(token)
             self.pathText.setText(path)
+            
         except:
-            self.logTextEdit.appendPlainText('Welcome to scdl-qt ! First run, creating config file....')
+            self.logTextEdit.insertHtml('Welcome to scdl-qt ! First run, creating config file....<br>To download tracks from your stream, get your token with "get sc token" and fill it in<br>')
 
 
     def saveconfig(self):
@@ -96,7 +115,7 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         type_dl = ''
         if self.streamRadio.isChecked() is False:
             if not re.match('(?:https?:\/\/)?(?:www\.?)?soundcloud\.com((?=([^a-z 0-9]))([^\s])*|)',self.urlText.text()):
-                self.logTextEdit.appendPlainText('not soundcloud URL')
+                self.logTextEdit.insertHtml('not soundcloud URL<br>')
                 self.go.setEnabled(True)
                 return
         if self.streamRadio.isChecked() is True:
@@ -107,31 +126,31 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
                 self.Tget_item.console.connect(self.onProgress)
                 self.Tget_item.start() 
             else:
-                self.logTextEdit.appendPlainText('Token inputed doesnt look valid.... Valid token is like : 1-126000-000707-50006e52ef30d000')
+                self.logTextEdit.insertHtml('Token doesnt look valid.... Valid token is like : 1-126000-000707-50006e52ef30d000. Click on get sc token<br>')
                 self.go.setEnabled(True)
         elif self.allfavsRadio.isChecked() is True:
             type_dl='f'
             if not re.match('http.?://(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,300})?/likes',self.urlText.text()):
-                self.logTextEdit.appendPlainText('if you want to dl favs, url needs to end with /likes or /likes/')
+                self.logTextEdit.insertHtml('if you want to dl favs, url needs to end with /likes or /likes/<br>')
                 self.go.setEnabled(True)
                 return
 
         elif self.alltracksRadio.isChecked() is True:
             type_dl='a'
             if not re.match('https?://(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,300})?',self.urlText.text()):
-                self.logTextEdit.appendPlainText('URL doesnt seems to be valid')
+                self.logTextEdit.insertHtml('URL doesnt seems to be valid<br>')
                 self.go.setEnabled(True)
                 return
         elif self.trackRadio.isChecked() is True:
             type_dl='t'
             if not re.match('https?://(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,300})?',self.urlText.text()):
-                self.logTextEdit.appendPlainText('URL doesnt seems to be valid')
+                self.logTextEdit.insertHtml('URL doesnt seems to be valid<br>')
                 self.go.setEnabled(True)
                 return
         elif self.playlistRadio.isChecked() is True:
             type_dl='p'
             if not re.match('https?://(?:www)?(?:[\w-]{2,255}(?:\.\w{2,6}){1,2})(?:/[\w&%?#-]{1,300})?',self.urlText.text()):
-                self.logTextEdit.appendPlainText('URL doesnt seems to be valid')
+                self.logTextEdit.insertHtml('URL doesnt seems to be valid<br>')
                 self.go.setEnabled(True)
                 return
         if type_dl != 'stream':
@@ -150,10 +169,19 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.pathText.setText(directory)
         
     def onProgress(self, message, p):
-        if 'fuck' not in message:
-            self.logTextEdit.appendPlainText(message)
-        if p is not 999:
+        #if p is 666:
+            #self.stop()
+            #self.go.setEnabled(True)
+            #self.stopButton.setEnabled(False)
+        if '%%%sp33d' in message:
+            self.speedLabel.setText(str(round(p/1000))+' KB/s')
+            p=999
+        elif '%%%PROGRESSSSS' not in message:
+            self.logTextEdit.insertHtml(message+'<br>')
+            p=999
+        if p is not (999 or 666):
             self.progressBar.setValue(p)
+            self.logTextEdit.moveCursor(QtGui.QTextCursor.End)
 
 class T_get_item(QThread): 
     console = QtCore.pyqtSignal(str, int)
@@ -184,7 +212,7 @@ class T_get_item(QThread):
             #self.console.emit('item retrieved {0}'.format(item.kind),999)
             return item
         except Exception:
-            self.console.emit('unknown error (fav dl broken as of now :( )',999)
+            self.console.emit('unknown error',999)
             #self._parse_url('','','','',True)
             return 
     
@@ -205,15 +233,14 @@ class T_get_item(QThread):
         #if abort is True:
             #return
         global arguments
+        if type=='f':
+           track_url = track_url.replace('/likes','')
+           item = self._get_item(track_url)
+           self._download_all_user_favs(self.urlin.replace('/likes',''), 'track', self._download_track, options)
+           type = 'a'
         item = self._get_item(track_url)
         if not item:
             return
-        elif isinstance(item, soundcloud.resource.ResourceList):
-            self._download_all(item, options)
-            #self._download_all_of_user(self.urlin, 'track', self._download_track, options)
-        
-        if type is 'f' and item.kind =='user':
-            self._download_all_of_user(self.urlin, 'favorite', self._download_track, options)
         if type is 't' and item.kind == 'track':
             self._download_track(item, date_t, options)
         elif item.kind == 'playlist' and type is 'p':
@@ -234,9 +261,10 @@ class T_get_item(QThread):
         try:
             current_user = client.get('/me')
         except:
-            self.console.emit('token problem',999)
+            self.console.emit('<font color="#CC001E">token problem</font>',999)
+            #self.console.emit('',666) #666 kills thread (or not)
             return
-        self.console.emit('Hello {0.username}!'.format(current_user).encode('ascii', errors='ignore').decode('ascii', errors='replace'), 999)
+        self.console.emit('<font color="#CC497E">Hello {0.username}!</font>'.format(current_user).encode('utf-8', errors='ignore').decode('utf-8', errors='replace'), 999)
         return current_user
     
     
@@ -245,7 +273,7 @@ class T_get_item(QThread):
         Find track & repost of the user
         """
         item = self._get_item(user)
-        url = 'https://api.sndcdn.com/e1/users/{0.id}/sounds.json?limit=1&offset={1}&client_id={2}'.format(item, 0, scdl_client_id)
+        url = 'https://api.sndcdn.com/e1/users/{0.id}/tracks.json?limit=1&offset={1}&client_id={2}'.format(item, 0, scdl_client_id)
         response = urllib.request.urlopen(url)
         
         data = response.read()
@@ -258,12 +286,32 @@ class T_get_item(QThread):
             except:
                 this_url = json_data[0]['playlist']['uri']
             self._parse_url(this_url, '0', 't', options)
-            url = 'https://api.sndcdn.com/e1/users/{0.id}/sounds.json?limit=1&offset={1}&client_id={2}'.format(item, self._offset, scdl_client_id)
+            url = 'https://api.sndcdn.com/e1/users/{0.id}/tracks.json?limit=1&offset={1}&client_id={2}'.format(item, self._offset, scdl_client_id)
             response = urllib.request.urlopen(url)
             data = response.read()
             text = data.decode('utf-8')
             json_data = json.loads(text)
-    
+
+    def _download_all_user_favs(self, user, name, download_function, options, abort=False): #BETA
+        """
+        Download all items of an user. Can be playlist or track, or whatever handled by the download function.
+        """
+        #if abort is True:
+            #return
+        
+        user2 = self._get_item(user)
+        self.console.emit('Retrieving the favorites of user {0.username}...might take a while...'.format(user2), 999)
+        items = client.get_all('/users/{0.id}/favorites'.format(user2))
+        total = len(items)
+        s = '' if total == 1 else 's'
+        self.console.emit('Retrieved {2} {0}{1}'.format(name, s, total), 999)
+        for counter, item in enumerate(items, 1):
+            try:
+                self.console.emit('{0} n°{1} of {2}'.format(name.capitalize(), counter, total), 999)
+                download_function(item, 0, options)
+            except Exception as e:
+                self.console.emit('ERROR:'+str(e), 999)
+        self.console.emit('Downloaded all favorites of user {0.username}!'.format(user2), 999)
     
     def _download_all_of_user(self, user, name, download_function, options, abort=False):
         """
@@ -359,7 +407,7 @@ class T_get_item(QThread):
                 stream_url = client.get(track.stream_url, allow_redirects=False)
                 url = stream_url.location
             except HTTPError:
-                self.console.emit('internet error. please restart the app or check your internet connection',999)
+                self.console.emit('<font color=red>internet error. please restart the app or check your internet connection</font>',999)
                 return
                 
         else:
@@ -367,8 +415,8 @@ class T_get_item(QThread):
             self.console.emit('Problem downloading this track, soundcloud api didnt give proper url', 999)
             return
         title = track.title
-        title = title.encode('utf-8', 'ignore').decode(sys.stdout.encoding)
-        self.console.emit('Downloading {0}'.format(title), 999)
+        title = title.encode('utf-8', 'ignore').decode('utf-8', 'ignore')
+        self.console.emit('<font color="#FF3196">>> {0}</font>'.format(title), 999)
         #filename
         if track.downloadable and 'm' not in options:
             #logger.info('Downloading the orginal file.')
@@ -408,19 +456,31 @@ class T_get_item(QThread):
             file_size=int(u.getheader('Content-Length'))
             #print("Downloading: {0} Bytes: {1}".format(url, file_size))
             size=round(file_size/1000000, 1)
-            self.console.emit('size: {0} Mb'.format(size), 999)
-
+            self.console.emit('size: <font color="#CC0066">{0} MB</font>'.format(size), 999)
+            speed_clock = 0
             file_size_dl = 0
             block_sz = 8196
+            start_time = time.time()
             while True:
                 buffer = u.read(block_sz)
                 if not buffer:
                     break
 
+                
                 file_size_dl += len(buffer)
+                speed_clock += len(buffer)
+                if speed_clock > 2000000:
+                    speed_clock =0
+                    elapsed = time.time() - start_time
+                    if elapsed > 0.0:
+                        speed = float(file_size_dl) / elapsed
+                        self.console.emit('%%%sp33d', speed)
                 f.write(buffer)
                 p = float(file_size_dl) / file_size
-                self.console.emit('fuck', int(p*100))
+                self.console.emit('%%%PROGRESSSSS', int(p*100))
+                
+                #now = time.time()
+
 
             f.close()
         elif 'c' not in options:  
