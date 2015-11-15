@@ -228,6 +228,10 @@ class Ui_MainWindow(object):
         self.tokenText.setGeometry(QtCore.QRect(450, 220, 241, 20))
         self.tokenText.setText("")
         self.tokenText.setObjectName("tokenText")
+        self.stopButton = QtWidgets.QPushButton(self.centralwidget)
+        self.stopButton.setEnabled(False)
+        self.stopButton.setGeometry(QtCore.QRect(660, 50, 31, 23))
+        self.stopButton.setObjectName("stopButton")
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
@@ -251,4 +255,5 @@ class Ui_MainWindow(object):
         self.gettokenButton.setText(_translate("MainWindow", "get sc token"))
         self.trackRadio.setText(_translate("MainWindow", "Track"))
         self.saveButton.setText(_translate("MainWindow", "save to config"))
+        self.stopButton.setText(_translate("MainWindow", "Stop"))
 

@@ -499,7 +499,7 @@ QRadioButton::indicator:hover
    </widget>
    <widget class="QRadioButton" name="allfavsRadio">
     <property name="enabled">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
     <property name="geometry">
      <rect>
@@ -598,6 +598,22 @@ QRadioButton::indicator:hover
     </property>
     <property name="text">
      <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="stopButton">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>660</x>
+      <y>50</y>
+      <width>31</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Stop</string>
     </property>
    </widget>
   </widget>
