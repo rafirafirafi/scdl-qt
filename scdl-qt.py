@@ -169,10 +169,12 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         self.pathText.setText(directory)
         
     def onProgress(self, message, p):
-        #if p is 666:
-            #self.stop()
-            #self.go.setEnabled(True)
-            #self.stopButton.setEnabled(False)
+        if p==666:
+            self.logTextEdit.insertHtml('<font color=red>File already exists, download stopped... Change options to change behavior :)<br></font>')
+            self.stop()
+            self.go.setEnabled(True)
+            self.stopButton.setEnabled(False)
+            return
         if '%%%sp33d' in message:
             self.speedLabel.setText(str(round(p/1000))+' KB/s')
             p=999
@@ -443,6 +445,7 @@ class T_get_item(QThread):
         filename=''.join(i for i in filename if i not in invalid_chars)
         if (os.path.isfile(self.pathin + '\\' + filename) and 'c' in options):
             #TODO: stop thread
+            self.console.emit('',666)
             return
             
         if (os.path.isfile(self.pathin + '\\' + filename) and 'c' not in options) or (not os.path.isfile(self.pathin + '\\' + filename)): 
@@ -469,15 +472,15 @@ class T_get_item(QThread):
                 
                 file_size_dl += len(buffer)
                 speed_clock += len(buffer)
-                if speed_clock > 2000000:
+                if speed_clock > 1000000: #refresh speed every 1MB (sorry i download at 20MB/s, scale might not be the same for you...
                     speed_clock =0
                     elapsed = time.time() - start_time
                     if elapsed > 0.0:
                         speed = float(file_size_dl) / elapsed
-                        self.console.emit('%%%sp33d', speed)
+                        self.console.emit('%%%sp33d', speed) # send speed with special str to update speed meter
                 f.write(buffer)
                 p = float(file_size_dl) / file_size
-                self.console.emit('%%%PROGRESSSSS', int(p*100))
+                self.console.emit('%%%PROGRESSSSS', int(p*100)) # spend progress with special str to update progressBar
                 
                 #now = time.time()
 
