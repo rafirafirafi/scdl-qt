@@ -265,7 +265,7 @@ QRadioButton::indicator:hover
       <x>100</x>
       <y>30</y>
       <width>411</width>
-      <height>20</height>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">

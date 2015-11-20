@@ -180,6 +180,7 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
             p=999
         elif '%%%PROGRESSSSS' not in message:
             self.logTextEdit.insertHtml(message+'<br>')
+            self.logTextEdit.moveCursor(QtGui.QTextCursor.End)
             p=999
         if p is not (999 or 666):
             self.progressBar.setValue(p)
@@ -462,7 +463,7 @@ class T_get_item(QThread):
             self.console.emit('size: <font color="#CC0066">{0} MB</font>'.format(size), 999)
             speed_clock = 0
             file_size_dl = 0
-            block_sz = 8196
+            block_sz = 65536
             start_time = time.time()
             while True:
                 buffer = u.read(block_sz)
@@ -472,7 +473,7 @@ class T_get_item(QThread):
                 
                 file_size_dl += len(buffer)
                 speed_clock += len(buffer)
-                if speed_clock > 1000000: #refresh speed every 1MB (sorry i download at 20MB/s, scale might not be the same for you...
+                if speed_clock > block_sz*5: #send speed signal to GUI every 5 blocks 
                     speed_clock =0
                     elapsed = time.time() - start_time
                     if elapsed > 0.0:
@@ -480,14 +481,14 @@ class T_get_item(QThread):
                         self.console.emit('%%%sp33d', speed) # send speed with special str to update speed meter
                 f.write(buffer)
                 p = float(file_size_dl) / file_size
-                self.console.emit('%%%PROGRESSSSS', int(p*100)) # spend progress with special str to update progressBar
+                self.console.emit('%%%PROGRESSSSS', int(p*100)) # send progress with special str to update progressBar
                 
                 #now = time.time()
 
 
             f.close()
-        elif 'c' not in options:  
-                self.console.emit('Already exists, skipping...', 999)
+        #elif 'c' not in options:  
+                #self.console.emit('Already exists, skipping...', 999)
     
         
 
