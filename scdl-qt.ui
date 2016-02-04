@@ -373,7 +373,7 @@ QRadioButton::indicator:hover
      <string>Stop download if file already exists</string>
     </property>
     <property name="checked">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
     <property name="autoRepeat">
      <bool>false</bool>
@@ -386,7 +386,7 @@ QRadioButton::indicator:hover
     <property name="geometry">
      <rect>
       <x>450</x>
-      <y>140</y>
+      <y>160</y>
       <width>167</width>
       <height>17</height>
      </rect>
@@ -443,7 +443,7 @@ QRadioButton::indicator:hover
     <property name="geometry">
      <rect>
       <x>450</x>
-      <y>163</y>
+      <y>180</y>
       <width>94</width>
       <height>17</height>
      </rect>
@@ -730,6 +730,31 @@ QRadioButton::indicator:hover
     </property>
     <property name="text">
      <string>Settings:</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="sBox">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>140</y>
+      <width>190</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
+    </property>
+    <property name="text">
+     <string>Skip if file exists</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+    <property name="autoRepeat">
+     <bool>false</bool>
     </property>
    </widget>
   </widget>

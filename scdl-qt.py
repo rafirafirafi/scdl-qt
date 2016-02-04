@@ -111,6 +111,8 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
             options=options+'r'
         if self.mp3Box.isChecked():
             options=options+'m'
+        if self.sBox.isChecked():
+            options=options+'s'
         self.go.setEnabled(False)
         type_dl = ''
         if self.streamRadio.isChecked() is False:
@@ -346,20 +348,23 @@ class T_get_item(QThread):
         data = response.read()
         text = data.decode('utf-8')
         json_data = json.loads(text)
-        while json_data and offset <=150:
-            this_url = json_data['collection'][offset]['origin']['uri']
-            type = json_data['collection'][offset]['type']
-            """logger.info('Type:{0}'.format(type))"""
-            date_track = json_data['collection'][offset]['created_at']
-            offset += 1
-            self.console.emit('Track n°{0}'.format(offset), 999)
-            format_src = "%Y/%m/%d %H:%M:%S"
-            format_dest = "%y%m%d %H%M%S - "
-            date_track  = time.strftime(format_dest, time.strptime(date_track[:-6],format_src))
-            if (type == 'track-repost') and 'r' in options:
-                self.console.emit('Repost skipped...', 999)
+        while json_data and offset <=149:
+            if json_data['collection'][offset]['origin']['uri'] is not None :
+                this_url = json_data['collection'][offset]['origin']['uri']
+                type = json_data['collection'][offset]['type']
+                """logger.info('Type:{0}'.format(type))"""
+                date_track = json_data['collection'][offset]['created_at']
+                offset += 1
+                self.console.emit('Track n°{0}'.format(offset), 999)
+                format_src = "%Y/%m/%d %H:%M:%S"
+                format_dest = "%y%m%d %H%M%S - "
+                date_track  = time.strftime(format_dest, time.strptime(date_track[:-6],format_src))
+                if (type == 'track-repost') and 'r' in options:
+                    self.console.emit('Repost skipped...', 999)
+                else:
+                    self._parse_url(this_url, date_track, 't', options)
             else:
-                self._parse_url(this_url, date_track, 't', options)
+                self.console.emit('error', 999)
         while 1:
             url = json_data['next_href']
             offset=0
@@ -447,6 +452,9 @@ class T_get_item(QThread):
         if (os.path.isfile(self.pathin + '\\' + filename) and 'c' in options):
             #TODO: stop thread
             self.console.emit('',666)
+            return
+        if (os.path.isfile(self.pathin + '\\' + filename) and 's' in options):
+            self.console.emit('<font color="#CC0066">file exists, skipped...</font>', 999)
             return
             
         if (os.path.isfile(self.pathin + '\\' + filename) and 'c' not in options) or (not os.path.isfile(self.pathin + '\\' + filename)): 
