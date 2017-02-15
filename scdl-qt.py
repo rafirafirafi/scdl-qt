@@ -14,27 +14,19 @@ import warnings
 import configparser
 import mutagen
 import urllib
+import soundcloud
 import re
 from requests.exceptions import HTTPError
 import requests
 requests.packages.urllib3.disable_warnings()
 
 #from scdl import __version__
-from scdl import soundcloud, utils
+#from scdl import soundcloud, utils
 from urllib.request import urlopen
 
 
 scdl_client_id = '95a4c0ef214f2a4a0852142807b54b35'
 client = soundcloud.Client(client_id=scdl_client_id)
-
-'''
-logging.basicConfig(level=logging.INFO, format='%(message)s')
-logging.getLogger('urllib3.connectionpool').setLevel(logging.ERROR)
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-logger.addFilter(utils.ColorizeFilter())
-logger.newline = print
-'''
 
 
 class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
@@ -51,22 +43,7 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
 
 
         self._get_config()
-
-        #self.alltracksRadio.clicked.connect(self.alltracksclicked)
-        #self.allfavsRadio.clicked.connect(self.allfavsclicked)
-
-        
-
-   # def alltracksclicked(self):
-        #if (self.urlText.text() == 'https://www.soundcloud.com/rafi-ki') or (self.urlText.text() == 'https://www.soundcloud.com/rafi-ki/likes') or (self.urlText.text() == 'https://soundcloud.com/rafi-ki/rafiki-mixtape-015-instrumental-hiphop-triphop') or (self.urlText.text() == 'https://soundcloud.com/marco-roeth/sets/trip-hop'):
-       #self.urlText.setText('https://www.soundcloud.com/rafi-ki')
-        ## def allfavsclicked(self):
-     #   if (self.urlText.text() == 'https://www.soundcloud.com/rafi-ki') or (self.urlText.text() == 'https://www.soundcloud.com/rafi-ki/likes') or (self.urlText.text() == 'https://soundcloud.com/rafi-ki/rafiki-mixtape-015-instrumental-hiphop-triphop') or (self.urlText.text() == 'https://soundcloud.com/marco-roeth/sets/trip-hop'):
-      #      self.urlText.setText('https://www.soundcloud.com/rafi-ki/likes')
-   # def alltracksclicked(self):
-      #  if (self.urlText.text() == 'https://www.soundcloud.com/rafi-ki') or (self.urlText.text() == 'https://www.soundcloud.com/rafi-ki/likes') or (self.urlText.text() == 'https://soundcloud.com/rafi-ki/rafiki-mixtape-015-instrumental-hiphop-triphop') or (self.urlText.text() == 'https://soundcloud.com/marco-roeth/sets/trip-hop'):
-       #     self.urlText.setText('https://www.soundcloud.com/rafi-ki')
-
+     
         
     def stop(self): #Dirty way to kill thread. A restart of the app should be done to avoid memory leaks... fine for now.
         if (self.Tget_item.isRunning):
