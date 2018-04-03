@@ -66,9 +66,25 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
         try:
             token = config['scdl']['auth_token']
             path = config['scdl']['path']
+            options = config['scdl']['options']
             self.tokenText.setText(token)
             self.pathText.setText(path)
-            
+            if 'c' in options:
+                self.cBox.setChecked(True)
+            else:
+                self.cBox.setChecked(False)
+            if 'r' in options:
+                self.rBox.setChecked(True)
+            else:
+                self.rBox.setChecked(False)
+            if 'm' in options:
+                self.mp3Box.setChecked(True)
+            else:
+                self.mp3Box.setChecked(False)
+            if 's' in options:
+                self.sBox.setChecked(True)
+            else:
+                self.sBox.setChecked(False)
         except:
             self.logTextEdit.insertHtml('Welcome to scdl-qt ! First run, creating config file....<br>To download tracks from your stream, get your token with "get sc token" and fill it in<br>')
 
@@ -77,7 +93,16 @@ class ExampleApp(QtWidgets.QMainWindow, design.Ui_MainWindow):
             with open(os.path.join(os.path.expanduser('~'), '.config/scdl/scdl-qt.cfg'),'w+') as f:
                 tok = self.tokenText.text()
                 pat = self.pathText.text()
-                f.write('[scdl]\nauth_token = {0}\npath = {1}'.format(tok, pat))
+                options = ''
+                if self.cBox.isChecked():
+                    options=options+'c'
+                if self.rBox.isChecked():
+                    options=options+'r'
+                if self.mp3Box.isChecked():
+                    options=options+'m'
+                if self.sBox.isChecked():
+                    options=options+'s'
+                f.write('[scdl]\nauth_token = {0}\npath = {1}\noptions = {2}'.format(tok, pat,options))
     
     def handleButton(self):
         options = ''
@@ -191,7 +216,7 @@ class T_get_item(QThread):
         """
         try:
             item = client.get('/resolve', url=urlin)
-            #self.console.emit('item retrieved {0}'.format(item.kind),999)
+            self.console.emit('item retrieved {0}'.format(item.kind),999)
             return item
         except Exception:
             self.console.emit('unknown error',999)
@@ -280,10 +305,13 @@ class T_get_item(QThread):
         """
         #if abort is True:
             #return
-        
+        """
         user2 = self._get_item(user)
         self.console.emit('Retrieving the favorites of user {0.username}...might take a while...'.format(user2), 999)
+        time.sleep(5)
+        #logger.info('user is{0}'.format(user2))
         items = client.get_all('/users/{0.id}/favorites'.format(user2))
+        #items = client.get_all('/users/rafi-ki/likes')
         total = len(items)
         s = '' if total == 1 else 's'
         self.console.emit('Retrieved {2} {0}{1}'.format(name, s, total), 999)
@@ -294,6 +322,55 @@ class T_get_item(QThread):
             except Exception as e:
                 self.console.emit('ERROR:'+str(e), 999)
         self.console.emit('Downloaded all favorites of user {0.username}!'.format(user2), 999)
+        """
+        offset=0
+        user2 = self._get_item(user)
+        self.console.emit('Retrieving the favorites of user {0.username}...might take a while...'.format(user2), 999)
+        #self.console.emit('https://api.soundcloud.com/users/{0.id}/favorites?limit=200&offset='.format(user2), 999)
+        url = 'https://api.soundcloud.com/users/{0.id}/favorites?limit=200&offset={1}&client_id={2}'.format(user2, offset, scdl_client_id)
+        #time.sleep(5)
+        response = urllib.request.urlopen(url)
+        data = response.read()
+        text = data.decode('utf-8')
+        json_data = json.loads(text)
+        while json_data :
+            if  json_data[offset]['uri'] is not None :
+                this_url = json_data[offset]['uri']
+                type = json_data[offset]['kind']
+                """logger.info('Type:{0}'.format(type))"""
+                date_track = json_data[offset]['created_at']
+                offset += 1
+                self.console.emit('Track n°{0}'.format(offset), 999)
+                format_src = "%Y/%m/%d %H:%M:%S"
+                format_dest = "%y%m%d %H%M%S - "
+                date_track  = time.strftime(format_dest, time.strptime(date_track[:-6],format_src))
+                if (type == 'track-repost') and 'r' in options:
+                    self.console.emit('Repost skipped...', 999)
+                else:
+                    self._parse_url(this_url, date_track, 't', options)
+            else:
+                self.console.emit('error', 999)
+        """while 1:
+            url = json_data['next_href']
+            offset=0
+            url = url + '&limit=150&oauth_token={0}'.format(self.token)
+            response = urllib.request.urlopen(url)
+            data = response.read()
+            text = data.decode('utf-8')
+            json_data = json.loads(text)
+            while json_data and offset <=145:
+                this_url = json_data[offset]['uri']
+                type = json_data[offset]['kind']
+                date_track = json_data[offset]['created_at']
+                offset += 1
+                format_src = "%Y/%m/%d %H:%M:%S"
+                format_dest = "%y%m%d %H%M%S - "
+                date_track  = time.strftime(format_dest, time.strptime(date_track[:-6],format_src))
+            if (type == 'track-repost') and 'r' in options:
+                self.console.emit('Repost skipped...', 999)
+            elif (type != 'track-repost'):
+                self._parse_url(this_url, date_track, 't', options)"""
+        
     
     def _download_all_of_user(self, user, name, download_function, options, abort=False):
         """
@@ -320,19 +397,21 @@ class T_get_item(QThread):
     def _download_my_stream(self, user, name, download_function, token, options):
     
         offset=0
-        url = 'https://api.soundcloud.com/me/activities/tracks/affiliated?limit=152&oauth_token={0}'.format(self.token)
+        url = 'https://api.soundcloud.com/me/activities/tracks/affiliated?limit=50&oauth_token={0}'.format(self.token)
         response = urllib.request.urlopen(url)
         data = response.read()
         text = data.decode('utf-8')
         json_data = json.loads(text)
-        while json_data and offset <=149:
-            if json_data['collection'][offset]['origin']['uri'] is not None :
+        loop = 0
+        while json_data and offset <=50:
+            try:
                 this_url = json_data['collection'][offset]['origin']['uri']
                 type = json_data['collection'][offset]['type']
                 """logger.info('Type:{0}'.format(type))"""
                 date_track = json_data['collection'][offset]['created_at']
                 offset += 1
-                self.console.emit('Track n°{0}'.format(offset), 999)
+                tracknum = offset+loop*50
+                self.console.emit('Track n°{0}'.format(tracknum), 999)
                 format_src = "%Y/%m/%d %H:%M:%S"
                 format_dest = "%y%m%d %H%M%S - "
                 date_track  = time.strftime(format_dest, time.strptime(date_track[:-6],format_src))
@@ -340,17 +419,26 @@ class T_get_item(QThread):
                     self.console.emit('Repost skipped...', 999)
                 else:
                     self._parse_url(this_url, date_track, 't', options)
-            else:
+                if offset==50:
+                    url = json_data['next_href'] + '&oauth_token={0}'.format(self.token)
+                    self.console.emit('next page loaded{0}'.format(url), 999)
+                    response = urllib.request.urlopen(url)
+                    data = response.read()
+                    text = data.decode('utf-8')
+                    json_data = json.loads(text)
+                    offset = 0
+                    loop += 1
+            except TypeError:
                 self.console.emit('error', 999)
-        while 1:
+        '''while 1:
             url = json_data['next_href']
             offset=0
-            url = url + '&limit=150&oauth_token={0}'.format(self.token)
+            url = url + '&limit=149&oauth_token={0}'.format(self.token)
             response = urllib.request.urlopen(url)
             data = response.read()
             text = data.decode('utf-8')
             json_data = json.loads(text)
-            while json_data and offset <=145:
+            while json_data and offset <=40:
                 this_url = json_data['collection'][offset]['origin']['uri']
                 type = json_data['collection'][offset]['type']
                 date_track = json_data['collection'][offset]['created_at']
@@ -361,7 +449,7 @@ class T_get_item(QThread):
             if (type == 'track-repost') and 'r' in options:
                 self.console.emit('Repost skipped...', 999)
             elif (type != 'track-repost'):
-                self._parse_url(this_url, date_track, 't', options)
+                self._parse_url(this_url, date_track, 't', options)'''
                 
     def _download_playlist(self, playlist, options, number):
         """
